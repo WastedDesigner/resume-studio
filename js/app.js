@@ -7,7 +7,8 @@
   const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
   const MM = 96 / 25.4;
   const KEY = 'resume-studio:v1';
-  const SKIP_PDF_TIP = 'resume-studio:skip-pdf-tip';
+  // Versioned so people who hid the old tip see the Microsoft Print to PDF warning once.
+  const SKIP_PDF_TIP = 'resume-studio:skip-pdf-tip-2';
 
   /* ---------- Storage ---------- */
   let store = { current: null, docs: Object.create(null) };
@@ -1164,7 +1165,7 @@ ${scopeCss(doc.design.customCss)}
 </style>
 </head>
 <body>
-<p class="tip">To save as PDF: press Ctrl+P (⌘P on a Mac), choose <b>Save as PDF</b>, keep Margins on Default and untick Headers and footers.</p>
+<p class="tip">To save as PDF: press Ctrl+P (⌘P on a Mac), choose <b>Save as PDF</b> (not Microsoft Print to PDF, which can make the text unselectable), keep Margins on Default and untick Headers and footers.</p>
 <div id="printRoot">${html}</div>
 </body>
 </html>
