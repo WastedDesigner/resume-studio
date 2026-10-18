@@ -260,7 +260,7 @@ RS.SAMPLES = [
   {
     id: 'software', name: 'Software Engineer',
     make: () => ({
-      basics: { name: 'Alex Morgan', title: 'Senior Software Engineer', email: 'alex.morgan@example.com', phone: '+1 555 014 2290', location: 'Seattle, WA', website: 'alexmorgan.dev', linkedin: 'linkedin.com/in/alexmorgan', github: 'github.com/alexmorgan', photo: '', links: [] },
+      basics: { name: 'Alex Skywalker', title: 'Senior Software Engineer', email: 'alex.skywalker@example.com', phone: '+1 555 014 2290', location: 'Seattle, WA', website: 'alexskywalker.example', linkedin: 'linkedin.example/in/alexskywalker', github: 'github.example/alexskywalker', photo: '', links: [] },
       sections: [
         sec('text', 'Profile', 'Full-stack engineer with 8 years of experience building fast, reliable web platforms. I enjoy turning messy problems into simple systems, mentoring developers and shipping work that customers notice.'),
         sec('experience', 'Experience', [
@@ -269,7 +269,7 @@ RS.SAMPLES = [
           { position: 'Junior Developer', company: 'Pixel & Pine', location: 'Portland, OR', start: 'Jan 2017', end: 'May 2018', description: '- Delivered 20+ client websites and e-commerce stores\n- Automated deployments with CI pipelines' },
         ]),
         sec('projects', 'Projects', [
-          { name: 'Tidewater', role: 'Open-source job queue for Node.js', link: 'github.com/alexmorgan/tidewater', start: '2022', end: '', description: '3.2k stars on GitHub; used in production by 60+ companies.' },
+          { name: 'Tidewater', role: 'Open-source job queue for Node.js', link: 'github.example/alexskywalker/tidewater', start: '2022', end: '', description: '3.2k stars on GitHub; used in production by 60+ companies.' },
         ]),
         sec('education', 'Education', [
           { degree: 'B.Sc. Computer Science', school: 'University of Washington', location: 'Seattle, WA', start: '2012', end: '2016', description: 'Graduated with honours. Capstone: real-time collaborative editor.' },
