@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resume Studio: free resume builder with PDF export</title>
+  <meta name="description" content="Build a polished resume in your browser and save it as a PDF. Dozens of templates, layouts, themes and fonts. Free, no sign-up, nothing uploaded.">
+  <meta name="theme-color" content="#4f46e5">
+  <script src="js/theme.js"></script>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/resume.css">
+  <style id="printStyle"></style>
+  <style id="customCss"></style>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Resume Studio">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="22" height="26" rx="4" fill="currentColor"/><rect x="10" y="9" width="12" height="2.4" rx="1.2" fill="#fff"/><rect x="10" y="14" width="8" height="2" rx="1" fill="#fff" opacity=".75"/><rect x="10" y="19" width="12" height="2" rx="1" fill="#fff" opacity=".75"/><rect x="10" y="23" width="10" height="2" rx="1" fill="#fff" opacity=".75"/></svg>
+        <span>Resume Studio</span>
+      </a>
+      <input id="docName" class="doc-name" aria-label="Resume name" maxlength="80" spellcheck="false">
+      <div class="spacer"></div>
+      <label class="theme-picker" for="siteTheme"><span>Appearance</span><select id="siteTheme" aria-label="Site appearance">
+        <option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option>
+      </select></label>
+      <span id="saveState" class="save-state" aria-live="polite"></span>
+      <button class="icon-btn" data-act="undo" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+      <button class="icon-btn" data-act="redo" id="btnRedo" title="Redo (Ctrl+Y)" aria-label="Redo"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+      <button class="btn primary" data-act="pdf"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg><span>Download PDF</span></button>
+    </header>
+
+    <div class="mobile-switch" role="group" aria-label="Workspace view">
+      <button data-view="edit" class="on" aria-pressed="true">Edit</button>
+      <button data-view="preview" aria-pressed="false">Preview</button>
+    </div>
+
+    <div class="workspace" data-view="edit">
+      <aside class="panel">
+        <nav class="tabs" role="tablist" aria-label="Resume editor">
+          <button role="tab" id="tab-btn-content" aria-controls="tab-content" data-tab="content" class="on">Content</button>
+          <button role="tab" id="tab-btn-templates" aria-controls="tab-templates" data-tab="templates">Templates</button>
+          <button role="tab" id="tab-btn-design" aria-controls="tab-design" data-tab="design">Design</button>
+          <button role="tab" id="tab-btn-check" aria-controls="tab-check" data-tab="check">Check</button>
+          <button role="tab" id="tab-btn-files" aria-controls="tab-files" data-tab="files">Files</button>
+        </nav>
+        <div class="tab-pane" id="tab-content" role="tabpanel" aria-labelledby="tab-btn-content"></div>
+        <div class="tab-pane" id="tab-templates" role="tabpanel" aria-labelledby="tab-btn-templates" hidden></div>
+        <div class="tab-pane" id="tab-design" role="tabpanel" aria-labelledby="tab-btn-design" hidden></div>
+        <div class="tab-pane" id="tab-check" role="tabpanel" aria-labelledby="tab-btn-check" hidden></div>
+        <div class="tab-pane" id="tab-files" role="tabpanel" aria-labelledby="tab-btn-files" hidden></div>
+      </aside>
+
+      <section class="stage" aria-label="Preview">
+        <div class="stage-bar">
+          <div class="zoom">
+            <button class="icon-btn" data-act="zoomOut" aria-label="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <button class="zoom-val" data-act="zoomFit" id="zoomVal" title="Fit to width">Fit</button>
+            <button class="icon-btn" data-act="zoomIn" aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button>
+          </div>
+          <span id="pageInfo" class="page-info"></span>
+          <button class="btn small" data-act="openPages" title="Add, remove or fit pages"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="11" height="14" rx="1.5"/><path d="M9 21h9a2 2 0 0 0 2-2V8"/></svg>Pages</button>
+          <div class="spacer"></div>
+          <label class="mini-toggle"><input type="checkbox" id="guidesToggle"> Page breaks</label>
+        </div>
+        <div class="stage-scroll" id="stageScroll">
+          <div class="page-frame" id="pageFrame"><div class="page-scale" id="pageScale"></div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="printRoot" aria-hidden="true"></div>
+
+  <dialog id="pdfDialog" class="dialog" aria-labelledby="pdfTitle">
+    <form method="dialog">
+      <h2 id="pdfTitle">Save as PDF</h2>
+      <p>Your browser's print window will open. To get a clean PDF:</p>
+      <ol class="steps">
+        <li>Set <b>Destination</b> (or Printer) to <b>Save as PDF</b>.</li>
+        <li>Keep <b>Margins</b> on <b>Default</b>.</li>
+        <li>Untick <b>Headers and footers</b> under More settings.</li>
+        <li>Click <b>Save</b>.</li>
+      </ol>
+      <p class="muted small">The PDF keeps real text, so recruiters and applicant tracking systems can read and search it.</p>
+      <label class="check"><input type="checkbox" id="pdfSkip"> Don't show this again</label>
+      <div class="dialog-actions">
+        <button value="cancel" class="btn">Cancel</button>
+        <button value="ok" class="btn primary" id="pdfGo">Open print window</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="pagesDialog" class="dialog wide" aria-labelledby="pagesTitle">
+    <form method="dialog">
+      <h2 id="pagesTitle">Pages</h2>
+      <p id="pagesInfo" class="muted"></p>
+      <h3>Add a page</h3>
+      <p class="muted small">Pick what should start the new page. Everything from there on moves to the next page.</p>
+      <div class="add-row"><select class="input" id="pageBreakAt" aria-label="Start the new page at"></select><button type="button" class="btn primary" data-act="addBreak">Add page</button></div>
+      <h3>Pages you added</h3>
+      <div id="pagesBreaks" class="break-list"></div>
+      <h3>Remove a page</h3>
+      <p class="muted small" id="fitText"></p>
+      <div class="btn-col" style="flex-direction:row;flex-wrap:wrap"><button type="button" class="btn" data-act="shrinkFit" id="fitBtn">Fit on fewer pages</button></div>
+      <div class="dialog-actions"><button value="cancel" class="btn">Done</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="promptDialog" class="dialog" aria-labelledby="promptTitle">
+    <form method="dialog">
+      <h2 id="promptTitle"></h2>
+      <p id="promptText" class="muted"></p>
+      <input id="promptInput" class="input" maxlength="80" aria-labelledby="promptTitle">
+      <div class="dialog-actions">
+        <button value="cancel" class="btn">Cancel</button>
+        <button value="ok" class="btn primary" id="promptOk">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/presets.js"></script>
+  <script src="js/text.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/formats.js"></script>
+  <script src="js/docx.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
