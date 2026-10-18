@@ -284,7 +284,7 @@ RS.SAMPLES = [
   {
     id: 'designer', name: 'Product Designer',
     make: () => ({
-      basics: { name: 'Priya Nair', title: 'Product Designer', email: 'priya.nair@example.com', phone: '+44 20 7946 0321', location: 'London, UK', website: 'priyanair.design', linkedin: 'linkedin.com/in/priyanair', github: '', photo: '', links: [{ label: 'Dribbble', url: 'dribbble.com/priyanair' }] },
+      basics: { name: 'Priya Nair', title: 'Product Designer', email: 'priya.nair@example.com', phone: '+44 20 7946 0321', location: 'London, UK', website: 'priyanair.example', linkedin: 'linkedin.example/in/priyanair', github: '', photo: '', links: [{ label: 'Dribbble', url: 'dribbble.com/priyanair' }] },
       sections: [
         sec('text', 'About me', 'Product designer who blends research, interaction design and visual craft. Six years designing mobile and web products for fintech and health, from first sketch to polished release.'),
         sec('experience', 'Experience', [
@@ -302,7 +302,7 @@ RS.SAMPLES = [
   {
     id: 'nurse', name: 'Registered Nurse',
     make: () => ({
-      basics: { name: 'Jordan Ellis', title: 'Registered Nurse (RN)', email: 'jordan.ellis@example.com', phone: '+61 400 555 018', location: 'Melbourne, VIC', website: '', linkedin: 'linkedin.com/in/jordanellisrn', github: '', photo: '', links: [] },
+      basics: { name: 'Jordan Ellis', title: 'Registered Nurse (RN)', email: 'jordan.ellis@example.com', phone: '+61 400 555 018', location: 'Melbourne, VIC', website: '', linkedin: 'linkedin.example/in/jordanellisrn', github: '', photo: '', links: [] },
       sections: [
         sec('text', 'Summary', 'Compassionate registered nurse with 7 years in emergency and acute care. Calm under pressure, skilled in triage and dedicated to patient-centred care and clear communication with families.'),
         sec('experience', 'Clinical experience', [
@@ -326,7 +326,7 @@ RS.SAMPLES = [
   {
     id: 'teacher', name: 'Teacher',
     make: () => ({
-      basics: { name: 'Sam Okafor', title: 'Secondary Science Teacher', email: 'sam.okafor@example.com', phone: '+1 555 302 7781', location: 'Toronto, ON', website: '', linkedin: 'linkedin.com/in/samokafor', github: '', photo: '', links: [] },
+      basics: { name: 'Sam Okafor', title: 'Secondary Science Teacher', email: 'sam.okafor@example.com', phone: '+1 555 302 7781', location: 'Toronto, ON', website: '', linkedin: 'linkedin.example/in/samokafor', github: '', photo: '', links: [] },
       sections: [
         sec('text', 'Profile', 'Enthusiastic science teacher with 9 years of classroom experience. I design hands-on lessons that make chemistry and physics click, and I lead the school\'s STEM club and robotics team.'),
         sec('experience', 'Teaching experience', [
@@ -346,7 +346,7 @@ RS.SAMPLES = [
   {
     id: 'marketing', name: 'Marketing Manager',
     make: () => ({
-      basics: { name: 'Taylor Brooks', title: 'Marketing Manager', email: 'taylor.brooks@example.com', phone: '+1 555 448 1903', location: 'Austin, TX', website: 'taylorbrooks.co', linkedin: 'linkedin.com/in/taylorbrooks', github: '', photo: '', links: [] },
+      basics: { name: 'Taylor Brooks', title: 'Marketing Manager', email: 'taylor.brooks@example.com', phone: '+1 555 448 1903', location: 'Austin, TX', website: 'taylorbrooks.example', linkedin: 'linkedin.example/in/taylorbrooks', github: '', photo: '', links: [] },
       sections: [
         sec('text', 'Summary', 'Data-driven marketer with 10 years growing B2B and consumer brands. I build teams and campaigns that tie creative work to revenue: brand, demand generation, content and lifecycle.'),
         sec('experience', 'Experience', [
@@ -363,7 +363,7 @@ RS.SAMPLES = [
   {
     id: 'graduate', name: 'Student / Graduate',
     make: () => ({
-      basics: { name: 'Mia Chen', title: 'Business Analytics Graduate', email: 'mia.chen@example.com', phone: '+1 555 770 2214', location: 'Boston, MA', website: '', linkedin: 'linkedin.com/in/miachen', github: 'github.com/miachen', photo: '', links: [] },
+      basics: { name: 'Mia Chen', title: 'Business Analytics Graduate', email: 'mia.chen@example.com', phone: '+1 555 770 2214', location: 'Boston, MA', website: '', linkedin: 'linkedin.example/in/miachen', github: 'github.example/miachen', photo: '', links: [] },
       sections: [
         sec('text', 'Objective', 'Recent graduate in business analytics looking for an analyst role where I can turn data into clear recommendations. Strong in SQL, Python and storytelling with dashboards.'),
         sec('education', 'Education', [{ degree: 'B.S. Business Analytics', school: 'Northeastern University', location: 'Boston, MA', start: '2021', end: '2025', description: '- GPA 3.8 / 4.0, Dean\'s List every semester\n- Thesis: forecasting retail demand with gradient boosting' }]),
@@ -399,7 +399,7 @@ RS.SAMPLES = [
   {
     id: 'webdev', name: 'Junior Web Developer (AU)',
     make: () => ({
-      basics: { name: 'Priya Ramanathan', title: 'Junior Web Developer', email: 'priya.r@example.com', phone: '0400 123 456', location: 'Dandenong VIC', website: 'priya-dev.example.com', linkedin: 'linkedin.com/in/priya-example', github: '', photo: '', links: [] },
+      basics: { name: 'Priya Ramanathan', title: 'Junior Web Developer', email: 'priya.r@example.com', phone: '0400 123 456', location: 'Dandenong VIC', website: 'priya-dev.example', linkedin: 'linkedin.example/in/priya-example', github: '', photo: '', links: [] },
       sections: [
         sec('text', 'Summary', 'Junior web developer with a Certificate IV in Information Technology and hands-on experience building responsive sites for small businesses. Comfortable with HTML, CSS, JavaScript and WordPress, and quick to pick up new tools. Looking for a graduate or junior role in a team that ships often.'),
         sec('experience', 'Experience', [
@@ -412,7 +412,7 @@ RS.SAMPLES = [
         ]),
         sec('certifications', 'Licences & certifications', [{ name: 'Provide First Aid (HLTAID011)', issuer: 'Example Training Co.', date: '2025', link: '', credential: 'Renew 2028' }]),
         sec('skills', 'Skills', [sk('Web', 0, 'HTML, CSS, JavaScript, WordPress, Responsive design, Accessibility (WCAG 2.1)'), sk('Tools', 0, 'Git & GitHub, Figma, VS Code, Chrome DevTools')]),
-        sec('projects', 'Projects', [{ name: 'Footy Fixture Tracker', role: '', link: 'github.com/example/fixtures', start: '', end: '', description: "Vanilla JS app that pulls fixture data and shows a club's next five games, with offline caching." }]),
+        sec('projects', 'Projects', [{ name: 'Footy Fixture Tracker', role: '', link: 'github.example/example/fixtures', start: '', end: '', description: "Vanilla JS app that pulls fixture data and shows a club's next five games, with offline caching." }]),
         sec('languages', 'Languages', [lang('English', 'Native', 0), lang('Tamil', 'Conversational', 0)]),
         sec('text', 'References', 'Available on request'),
       ],
