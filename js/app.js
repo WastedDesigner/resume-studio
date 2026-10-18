@@ -100,6 +100,7 @@
       else if (typeof def === 'boolean') d[k] = !!v;
       else d[k] = str(v);
     }
+    RS.normHeader(d);
     if (!RS.THEMES.some(t => t.id === d.theme)) d.theme = RS.DEFAULT_DESIGN.theme;
     if (!RS.FONTS.some(f => f.name === d.fontHeading)) d.fontHeading = RS.DEFAULT_DESIGN.fontHeading;
     if (!RS.FONTS.some(f => f.name === d.fontBody)) d.fontBody = RS.DEFAULT_DESIGN.fontBody;
@@ -472,7 +473,7 @@
   /* ---------- Design tab ---------- */
   const SELECTS = {
     sideStyle: [['filled', 'Filled colour'], ['tint', 'Light tint'], ['plain', 'Plain'], ['rule', 'Divider line']],
-    header: [['center', 'Centered'], ['left', 'Left aligned'], ['split', 'Split (contact right)'], ['banner', 'Colour banner'], ['banner-center', 'Centered banner'], ['sidebar', 'In the sidebar']],
+    header: [['center', 'Centered'], ['left', 'Left aligned'], ['split', 'Split (contact right)'], ['sidebar', 'In the sidebar']],
     heading: [['line', 'Underline rule'], ['bar', 'Accent bar'], ['caps', 'Small caps + dash'], ['block', 'Filled label'], ['underline', 'Short underline'], ['dot', 'Dot'], ['boxed', 'Boxed'], ['plain', 'Plain'], ['side', 'Side gutter'], ['ribbon', 'Soft ribbon'], ['double', 'Double rule'], ['bracket', 'Brackets']],
     itemStyle: [['stacked', 'Standard'], ['dates-left', 'Dates in left column'], ['timeline', 'Timeline'], ['cards', 'Cards'], ['inline', 'Compact one-line'], ['bordered', 'Outlined cards'], ['ruled', 'Fine dividers']],
     dateAlign: [['right', 'Right aligned'], ['accent', 'Right, accent colour'], ['before', 'Before the title']],
@@ -496,12 +497,12 @@
   function layoutIcon(l) {
     const s = l.set, r = [];
     const side = s.columns !== 'one', left = s.columns === 'left';
-    const banner = s.header === 'banner' || s.header === 'banner-center';
+    const banner = !!s.headerBanner;
     if (banner) r.push('<i class="a" style="left:0;top:0;right:0;height:14px;border-radius:0"></i>');
     if (side && (s.sideStyle === 'filled' || s.sideStyle === 'tint' || !s.sideStyle)) r.push(`<i class="a" style="${left ? 'left:0' : 'right:0'};top:${banner ? 14 : 0}px;bottom:0;width:30%;border-radius:0;opacity:${s.sideStyle === 'tint' ? .3 : .75}"></i>`);
     const mx = side ? (left ? 36 : 6) : 8, mw = side ? 56 : 84;
     const top = banner ? 20 : (s.header === 'sidebar' && side ? 6 : 16);
-    if (!banner && !(s.header === 'sidebar' && side)) r.push(`<i style="left:${s.header === 'center' || s.header === 'banner-center' ? 30 : mx}%;top:5px;width:40%;height:6px"></i>`);
+    if (!banner && !(s.header === 'sidebar' && side)) r.push(`<i style="left:${s.header === 'center' ? 30 : mx}%;top:5px;width:40%;height:6px"></i>`);
     for (let k = 0; k < 5; k++) {
       const x = s.heading === 'side' ? mx + 20 : (s.itemStyle === 'dates-left' ? mx + 16 : mx);
       const w = s.heading === 'side' ? mw - 20 : (s.itemStyle === 'dates-left' ? mw - 16 : mw);
@@ -538,7 +539,9 @@
     html += '<div class="group-title">Structure</div>';
     html += `<div class="ctrl"><label>Columns</label><div class="seg">${[['one', 'One'], ['left', 'Sidebar left'], ['right', 'Sidebar right']].map(([v, t]) => `<button data-act="columns" data-v="${v}" class="${d.columns === v ? 'on' : ''}">${t}</button>`).join('')}</div></div>`;
     if (d.columns !== 'one') html += rng('sideWidth', 'Sidebar width', 22, 42, 1, '%') + sel('sideStyle', 'Sidebar style');
-    html += sel('header', 'Header') + sel('heading', 'Section titles') + sel('itemStyle', 'Entries') + sel('dateAlign', 'Dates') + sel('skillStyle', 'Skills') + sel('bullet', 'Bullets') + sel('contactStyle', 'Contact details');
+    html += sel('header', 'Header');
+    if (!(d.columns !== 'one' && d.header === 'sidebar')) html += tog('headerBanner', 'Colour banner');
+    html += sel('heading', 'Section titles') + sel('itemStyle', 'Entries') + sel('dateAlign', 'Dates') + sel('skillStyle', 'Skills') + sel('bullet', 'Bullets') + sel('contactStyle', 'Contact details');
 
     html += '<div class="group-title">Page & spacing</div>';
     html += sel('pageSize', 'Paper size') + rng('margin', 'Page margins', 6, 25, 1, 'mm') + rng('sectionGap', 'Section spacing', 0.4, 2.6, 0.1, 'em') + rng('itemGap', 'Entry spacing', 0.2, 1.8, 0.05, 'em');
@@ -1292,9 +1295,9 @@ ${scopeCss(doc.design.customCss)}
       doc.design[k] = v;
       if (el.type === 'range') { const o = el.parentElement.querySelector('output'); const unit = { fontSize: 'pt', nameSize: '×', headingSize: '×', sideWidth: '%', margin: 'mm', sectionGap: 'em', itemGap: 'em', photoSize: 'mm' }[k] || ''; if (o) o.textContent = fmt(v, unit); }
       if (k === 'showGuides') $('#guidesToggle').checked = v;
-      const structural = ['header', 'columns', 'sideStyle', 'heading', 'itemStyle', 'skillStyle', 'bullet', 'contactStyle', 'dateAlign'];
+      const structural = ['header', 'headerBanner', 'columns', 'sideStyle', 'heading', 'itemStyle', 'skillStyle', 'bullet', 'contactStyle', 'dateAlign'];
       if (structural.includes(k) || k.startsWith('font')) doc.design.template = '';
-      if (e.type === 'change' && (k === 'fontHeading' || k === 'fontBody' || k === 'accent' || k === 'sideColor')) changed({ design: true });
+      if (e.type === 'change' && (k === 'fontHeading' || k === 'fontBody' || k === 'accent' || k === 'sideColor' || k === 'header')) changed({ design: true });
       else changed();
     }
   }

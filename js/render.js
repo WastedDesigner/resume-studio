@@ -107,10 +107,11 @@
     const title = b.title ? `<div class="rs-jobtitle"${RS.formatAttr((b.formats || {}).title)}>${inline(b.title)}</div>` : '';
     const contact = contacts(b, d);
     const style = where === 'side' ? 'side' : d.header;
+    const banner = where !== 'side' && d.headerBanner ? ' rs-h-banner' : '';
     if (style === 'split') {
-      return `<header class="rs-header rs-h-split">${photo}<div class="rs-head-id">${name}${title}</div><div class="rs-head-contact">${contact}</div></header>`;
+      return `<header class="rs-header rs-h-split${banner}">${photo}<div class="rs-head-id">${name}${title}</div><div class="rs-head-contact">${contact}</div></header>`;
     }
-    return `<header class="rs-header rs-h-${style}">${photo}<div class="rs-head-id">${name}${title}</div>${contact}</header>`;
+    return `<header class="rs-header rs-h-${style}${banner}">${photo}<div class="rs-head-id">${name}${title}</div>${contact}</header>`;
   }
 
   /* ---------- Sections ---------- */
@@ -211,14 +212,14 @@
 
   /* ---------- Whole page ---------- */
   RS.render = function (doc) {
-    const d = Object.assign({}, RS.DEFAULT_DESIGN, doc.design || {});
+    const d = RS.normHeader(Object.assign({}, RS.DEFAULT_DESIGN, doc.design || {}));
     const data = doc.data || { basics: {}, sections: [] };
     const b = data.basics || {};
     const c = RS.colors(d);
     const [pw, ph] = RS.PAGE[d.pageSize] || RS.PAGE.A4;
     const two = d.columns !== 'one';
     const filled = two && (d.sideStyle === 'filled' || d.sideStyle === 'tint');
-    const banner = d.header === 'banner' || d.header === 'banner-center';
+    const banner = !!d.headerBanner && !(two && d.header === 'sidebar');
 
     // Where the header goes.
     let headWhere = 'top';
@@ -226,7 +227,7 @@
     else if (two && !banner && filled) headWhere = 'main';
     if (!two && d.header === 'sidebar') d.header = 'left';
     const headStyle = (headWhere !== 'side' && d.header === 'sidebar') ? 'left' : d.header;
-    const hd = Object.assign({}, d, { header: headStyle });
+    const hd = Object.assign({}, d, { header: headStyle, headerBanner: banner });
 
     const secs = (data.sections || []).filter(s => s.visible !== false);
     const sideSecs = two ? secs.filter(s => s.col === 'side') : [];

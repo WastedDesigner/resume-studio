@@ -59,16 +59,13 @@
 .rs-h-split .rs-head-contact .rs-contact { flex-direction: column; align-items: flex-end; gap: .25em; margin-top: 0; text-align: right; }
 .rs-h-split .rs-contact li { flex-direction: row-reverse; }
 
-.rs-h-banner, .rs-h-banner-center { background: var(--head-bg); color: var(--head-text); padding: calc(var(--m) * 1.05) var(--m); flex-wrap: wrap; }
-.rs-h-banner .rs-name, .rs-h-banner-center .rs-name { color: var(--head-text); }
-.rs-h-banner .rs-jobtitle, .rs-h-banner-center .rs-jobtitle { color: var(--head-accent); }
-.rs-h-banner .rs-contact, .rs-h-banner-center .rs-contact { color: color-mix(in srgb, var(--head-text) 82%, transparent); }
-.rs-h-banner .rs-ico, .rs-h-banner-center .rs-ico { stroke: var(--head-accent); }
-.rs-h-banner .rs-head-id { flex: 1; }
-.rs-h-banner .rs-contact { flex-basis: 100%; }
-.rs-h-banner-center { flex-direction: column; text-align: center; }
-.rs-h-banner-center .rs-contact { justify-content: center; }
-.rs-h-banner .rs-contact-pipes li:not(:last-child)::after, .rs-h-banner-center .rs-contact-pipes li:not(:last-child)::after { color: inherit; }
+/* Colour banner: an on/off fill that works with any top header style */
+.rs-h-banner { background: var(--head-bg); color: var(--head-text); padding: calc(var(--m) * 1.05) var(--m); }
+.rs-h-banner .rs-name { color: var(--head-text); }
+.rs-h-banner .rs-jobtitle { color: var(--head-accent); }
+.rs-h-banner .rs-contact, .rs-h-banner .rs-clabel { color: color-mix(in srgb, var(--head-text) 82%, transparent); }
+.rs-h-banner .rs-ico { stroke: var(--head-accent); }
+.rs-h-banner .rs-contact-pipes li:not(:last-child)::after { color: inherit; }
 
 /* Header inside the sidebar */
 .rs-h-side { flex-direction: column; align-items: flex-start; padding: 0; margin-bottom: var(--gap); gap: .7em; }

@@ -15,7 +15,7 @@
   const mix = (a, b, ratio) => [0, 2, 4].map(i => round(parseInt(a.slice(i, i + 2), 16) * ratio + parseInt(b.slice(i, i + 2), 16) * (1 - ratio)).toString(16).padStart(2, '0')).join('').toUpperCase();
 
   RS.buildDocx = async function (doc, JSZip) {
-    const d = { ...RS.DEFAULT_DESIGN, ...doc.design }, data = doc.data || {}, basics = data.basics || {};
+    const d = RS.normHeader({ ...RS.DEFAULT_DESIGN, ...doc.design }), data = doc.data || {}, basics = data.basics || {};
     const colors = RS.colors(d), zip = new JSZip(), relationships = [];
     const font = RS.font(d.fontBody).name, headingFont = RS.font(d.fontHeading).name;
     const base = round(d.fontSize * 2), em = d.fontSize * 20;
@@ -80,8 +80,8 @@
     for (const [key, label, symbol] of [['website', 'Web', '↗'], ['linkedin', 'LinkedIn', 'in'], ['github', 'GitHub', 'GH']]) contact(key, label, RS.prettyUrl(basics[key]), basics[key], symbol);
     (basics.links || []).forEach(l => contact('link', l.label || 'Link', RS.prettyUrl(l.url), l.url, '↗'));
     const header = (w, palette, where) => {
-      const center = where !== 'side' && ['center', 'banner-center'].includes(d.header), split = where !== 'side' && d.header === 'split';
-      const banner = where !== 'side' && /^banner/.test(d.header), f = basics.formats || {};
+      const center = where !== 'side' && d.header === 'center', split = where !== 'side' && d.header === 'split';
+      const banner = where !== 'side' && d.headerBanner, f = basics.formats || {};
       const p = banner ? { text: hex(colors.sideText), muted: hex(colors.sideText), accent: hex(colors.sideAccent), bg: hex(colors.side) } : palette;
       const contactLine = (c, align) => {
         const prefix = d.contactStyle === 'icons' ? run(c.symbol + ' ', { color: p.accent, font: 'Segoe UI Symbol', sz: round(base * .92) }) : d.contactStyle === 'labels' ? run(c.label + ': ', { b: true, color: p.text, sz: round(base * .92) }) : '';
@@ -189,7 +189,7 @@
     };
     const SKILL_TYPES = ['skills', 'languages', 'interests'];
     const sections = (data.sections || []).filter(s => s.visible !== false);
-    const two = d.columns !== 'one', banner = /^banner/.test(d.header), filled = ['filled', 'tint'].includes(d.sideStyle);
+    const two = d.columns !== 'one', banner = !!d.headerBanner && !(two && d.header === 'sidebar'), filled = ['filled', 'tint'].includes(d.sideStyle);
     const headWhere = two && !banner && d.header === 'sidebar' ? 'side' : two && !banner && filled ? 'main' : 'top';
     let body = headWhere === 'top' ? header(width, theme, 'top') : '';
     if (!two) body += sections.map(s => section(s, theme, width, false)).join('');

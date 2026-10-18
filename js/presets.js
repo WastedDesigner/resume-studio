@@ -142,9 +142,9 @@ RS.LAYOUTS = [
   { id: 'sidebar-left', name: 'Left sidebar', desc: 'Coloured sidebar with your details', set: { columns: 'left', sideStyle: 'filled', header: 'sidebar', itemStyle: 'stacked', heading: 'caps' } },
   { id: 'sidebar-right', name: 'Right sidebar', desc: 'Coloured sidebar on the right', set: { columns: 'right', sideStyle: 'filled', header: 'sidebar', itemStyle: 'stacked', heading: 'caps' } },
   { id: 'tint-left', name: 'Light sidebar', desc: 'Soft tinted sidebar', set: { columns: 'left', sideStyle: 'tint', header: 'left', itemStyle: 'stacked', heading: 'line' } },
-  { id: 'banner', name: 'Banner', desc: 'Full-width coloured header', set: { columns: 'one', header: 'banner', itemStyle: 'stacked', heading: 'line' } },
-  { id: 'banner-cols', name: 'Banner + columns', desc: 'Coloured header, two columns', set: { columns: 'right', sideStyle: 'plain', header: 'banner', itemStyle: 'stacked', heading: 'underline' } },
-  { id: 'banner-center', name: 'Centered banner', desc: 'Centered coloured header', set: { columns: 'one', header: 'banner-center', itemStyle: 'stacked', heading: 'caps' } },
+  { id: 'banner', name: 'Banner', desc: 'Full-width coloured header', set: { columns: 'one', header: 'left', headerBanner: true, itemStyle: 'stacked', heading: 'line' } },
+  { id: 'banner-cols', name: 'Banner + columns', desc: 'Coloured header, two columns', set: { columns: 'right', sideStyle: 'plain', header: 'left', headerBanner: true, itemStyle: 'stacked', heading: 'underline' } },
+  { id: 'banner-center', name: 'Centered banner', desc: 'Centered coloured header', set: { columns: 'one', header: 'center', headerBanner: true, itemStyle: 'stacked', heading: 'caps' } },
   { id: 'timeline', name: 'Timeline', desc: 'Entries on a vertical line', set: { columns: 'one', header: 'left', itemStyle: 'timeline', heading: 'plain' } },
   { id: 'dates-left', name: 'Dates left', desc: 'Dates in their own column', set: { columns: 'one', header: 'center', itemStyle: 'dates-left', heading: 'line' } },
   { id: 'side-headings', name: 'Side headings', desc: 'Section titles in a left gutter', set: { columns: 'one', header: 'left', itemStyle: 'stacked', heading: 'side' } },
@@ -153,7 +153,7 @@ RS.LAYOUTS = [
   { id: 'ats', name: 'ATS plain', desc: 'Single column, no graphics', set: { columns: 'one', header: 'left', itemStyle: 'stacked', heading: 'line', contactStyle: 'pipes', showPhoto: false, skillStyle: 'inline' } },
   { id: 'editorial', name: 'Editorial', desc: 'Centered masthead and double rules', set: { columns: 'one', header: 'center', itemStyle: 'ruled', heading: 'double', contactStyle: 'pipes' } },
   { id: 'framed', name: 'Framed', desc: 'Split header and outlined entries', set: { columns: 'one', header: 'split', itemStyle: 'bordered', heading: 'bracket' } },
-  { id: 'ribbon-cols', name: 'Ribbon columns', desc: 'Banner, soft headings and sidebar', set: { columns: 'right', sideStyle: 'tint', header: 'banner', itemStyle: 'ruled', heading: 'ribbon' } },
+  { id: 'ribbon-cols', name: 'Ribbon columns', desc: 'Banner, soft headings and sidebar', set: { columns: 'right', sideStyle: 'tint', header: 'left', headerBanner: true, itemStyle: 'ruled', heading: 'ribbon' } },
 ];
 
 /* ---------- Default design ---------- */
@@ -161,7 +161,7 @@ RS.DEFAULT_DESIGN = {
   template: 'modern',
   layout: 'sidebar-left',
   columns: 'left', sideWidth: 32, sideStyle: 'filled',
-  header: 'sidebar', heading: 'caps', itemStyle: 'stacked',
+  header: 'sidebar', headerBanner: false, heading: 'caps', itemStyle: 'stacked',
   skillStyle: 'bars', bullet: 'disc', contactStyle: 'icons',
   theme: 'slate', accent: '', sideColor: '',
   fontHeading: 'Inter', fontBody: 'Inter',
@@ -216,7 +216,13 @@ RS.TEMPLATES = [
 RS.applyLayout = function (design, layoutId) {
   const l = RS.LAYOUTS.find(x => x.id === layoutId);
   if (!l) return design;
-  return Object.assign(design, { sideStyle: 'filled', contactStyle: design.contactStyle === 'pipes' ? 'icons' : design.contactStyle }, l.set, { layout: l.id });
+  return RS.normHeader(Object.assign(design, { sideStyle: 'filled', headerBanner: false, contactStyle: design.contactStyle === 'pipes' ? 'icons' : design.contactStyle }, l.set, { layout: l.id }));
+};
+// Older saves stored the colour banner as its own header style.
+RS.normHeader = function (design) {
+  if (design.header === 'banner') Object.assign(design, { header: 'left', headerBanner: true });
+  else if (design.header === 'banner-center') Object.assign(design, { header: 'center', headerBanner: true });
+  return design;
 };
 RS.applyTemplate = function (design, templateId) {
   const t = RS.TEMPLATES.find(x => x.id === templateId);
