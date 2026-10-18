@@ -131,6 +131,17 @@ RS.THEMES = [
   theme('copper', 'Copper', '#974521', '#422b22', '#fff3e8', { sideAccent: '#f4b68c' }),
   theme('lagoon', 'Lagoon', '#0e7490', '#164e63', '#ecfeff', { sideAccent: '#67e8f9' }),
   theme('linen', 'Linen', '#766039', '#eee8dc', '#443a29', { bg: '#fffdf8', text: '#302b24', muted: '#706653' }),
+  theme('heritage', 'Heritage Green & Brass', '#2f5d50', '#1b3a33', '#eef4f1', { sideAccent: '#d4b483' }),
+  theme('claret', 'Claret & Stone', '#8b2635', '#2e2a28', '#f3efe9', { sideAccent: '#d9a5ac' }),
+  theme('petrol', 'Petrol & Sand', '#1d5c63', '#12393e', '#f2ede3', { sideAccent: '#e0c9a6' }),
+  theme('aubergine', 'Aubergine & Blush', '#5e3a6e', '#2b1b33', '#f5eef6', { sideAccent: '#e6b8c7' }),
+  theme('denim', 'Denim & Rust', '#a8492a', '#22344c', '#edf1f6', { sideAccent: '#f0a37c' }),
+  theme('storm', 'Storm & Teal', '#23727a', '#2d3540', '#eef1f4', { sideAccent: '#8fd1cf' }),
+  theme('indigo', 'Indigo & Ochre', '#34407a', '#1f2547', '#eef0fa', { sideAccent: '#e2b45c' }),
+  theme('rosewood', 'Charcoal & Rosewood', '#9e4560', '#2a2a2e', '#f2eff0', { sideAccent: '#e8a3b3' }),
+  theme('stone', 'Stone & Teal', '#2a6767', '#e8e6e1', '#2e3a3a'),
+  theme('dove', 'Dove Grey & Navy', '#24477a', '#eceef1', '#1d2b44'),
+  theme('evergreen', 'Evergreen & Cream', '#2d5e46', '#f4f1e6', '#1f3d2f'),
 ];
 RS.theme = id => RS.THEMES.find(t => t.id === id) || RS.THEMES[0];
 
