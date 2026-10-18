@@ -142,6 +142,14 @@ RS.THEMES = [
   theme('stone', 'Stone & Teal', '#2a6767', '#e8e6e1', '#2e3a3a'),
   theme('dove', 'Dove Grey & Navy', '#24477a', '#eceef1', '#1d2b44'),
   theme('evergreen', 'Evergreen & Cream', '#2d5e46', '#f4f1e6', '#1f3d2f'),
+  theme('nebula', 'Nebula', '#5b46c9', '#1e1b3a', '#efedfb', { sideAccent: '#b9a8ff' }),
+  theme('obsidian', 'Obsidian & Electric Blue', '#2457d6', '#121417', '#eceff3', { sideAccent: '#7fa8ff' }),
+  theme('moss', 'Moss & Clay', '#8a5a3c', '#2f3a2c', '#f0efe6', { sideAccent: '#d9a882' }),
+  theme('dusk', 'Dusk & Peach', '#6a4f9c', '#3a3450', '#f3f0f7', { sideAccent: '#f5b99a' }),
+  theme('jade', 'Jade', '#0b7a5e', '#0d2b26', '#e8f5f1', { sideAccent: '#5fd3b0' }),
+  theme('mocha', 'Mocha', '#7a4e3a', '#efe4da', '#3e2a20', { bg: '#fffcf9' }),
+  theme('ultramarine', 'Ultramarine', '#2f47c4', '#e8edfb', '#1b2b6b'),
+  theme('glacier', 'Glacier', '#1f6c80', '#e4eff2', '#173a45'),
 ];
 RS.theme = id => RS.THEMES.find(t => t.id === id) || RS.THEMES[0];
 
@@ -164,6 +172,14 @@ RS.LAYOUTS = [
   { id: 'ats', name: 'ATS plain', desc: 'Single column, no graphics', set: { columns: 'one', header: 'left', itemStyle: 'stacked', heading: 'line', contactStyle: 'pipes', showPhoto: false, skillStyle: 'inline' } },
   { id: 'editorial', name: 'Editorial', desc: 'Centered masthead and double rules', set: { columns: 'one', header: 'center', itemStyle: 'ruled', heading: 'double', contactStyle: 'pipes' } },
   { id: 'framed', name: 'Framed', desc: 'Split header and outlined entries', set: { columns: 'one', header: 'split', itemStyle: 'bordered', heading: 'bracket' } },
+  { id: 'banner-sidebar', name: 'Banner + sidebar', desc: 'Colour header over a filled sidebar', set: { columns: 'left', sideStyle: 'filled', header: 'left', headerBanner: true, itemStyle: 'stacked', heading: 'caps', sideWidth: 30 } },
+  { id: 'split-banner', name: 'Split banner', desc: 'Colour header, contact on the right', set: { columns: 'one', header: 'split', headerBanner: true, itemStyle: 'stacked', heading: 'bar' } },
+  { id: 'swiss', name: 'Swiss grid', desc: 'Narrow open sidebar, clean rules', set: { columns: 'left', sideStyle: 'plain', header: 'left', itemStyle: 'ruled', heading: 'plain', sideWidth: 26 } },
+  { id: 'centered-cols', name: 'Centered columns', desc: 'Centered header, divided columns', set: { columns: 'right', sideStyle: 'rule', header: 'center', itemStyle: 'stacked', heading: 'underline' } },
+  { id: 'timeline-cols', name: 'Timeline + sidebar', desc: 'Timeline entries beside a side column', set: { columns: 'right', sideStyle: 'plain', header: 'split', itemStyle: 'timeline', heading: 'dot' } },
+  { id: 'tint-right', name: 'Soft right panel', desc: 'Tinted right sidebar, centered name', set: { columns: 'right', sideStyle: 'tint', header: 'center', itemStyle: 'ruled', heading: 'ribbon' } },
+  { id: 'cards-banner', name: 'Banner cards', desc: 'Centered colour header with card entries', set: { columns: 'one', header: 'center', headerBanner: true, itemStyle: 'cards', heading: 'caps' } },
+  { id: 'gutter', name: 'Gutter', desc: 'Split header and side-gutter headings', set: { columns: 'one', header: 'split', itemStyle: 'ruled', heading: 'side' } },
   { id: 'ribbon-cols', name: 'Ribbon columns', desc: 'Banner, soft headings and sidebar', set: { columns: 'right', sideStyle: 'tint', header: 'left', headerBanner: true, itemStyle: 'ruled', heading: 'ribbon' } },
 ];
 
@@ -220,6 +236,15 @@ RS.TEMPLATES = [
   { id: 'mono', name: 'Mono', desc: 'Technical typography and compact detail', set: { layout: 'left', theme: 'graphite', fontHeading: 'JetBrains Mono', fontBody: 'IBM Plex Sans', heading: 'double', itemStyle: 'ruled', skillStyle: 'inline', contactStyle: 'pipes', showPhoto: false, nameSize: 2.2, fontSize: 9.5 } },
   { id: 'portfolio', name: 'Portfolio', desc: 'Violet banner and framed project entries', set: { layout: 'ribbon-cols', theme: 'violet', fontHeading: 'Outfit', fontBody: 'DM Sans', itemStyle: 'bordered', skillStyle: 'tags', upperHeadings: false, nameSize: 3, photoShape: 'square' } },
   { id: 'heritage', name: 'Heritage', desc: 'Traditional serif with generous spacing', set: { layout: 'editorial', theme: 'burgundy', fontHeading: 'Garamond', fontBody: 'Cambria', skillStyle: 'inline', showPhoto: false, upperHeadings: false, fontSize: 11, nameSize: 2.8, sectionGap: 1.4 } },
+  { id: 'nebula', name: 'Nebula', desc: 'Deep violet sidebar with geometric type', set: { layout: 'sidebar-left', theme: 'nebula', fontHeading: 'Sora', fontBody: 'Manrope', heading: 'caps', skillStyle: 'tags', photoShape: 'rounded', sideWidth: 31 } },
+  { id: 'obsidian', name: 'Obsidian', desc: 'Near-black banner with electric blue accents', set: { layout: 'banner-cols', theme: 'obsidian', fontHeading: 'Space Grotesk', fontBody: 'Inter', heading: 'bar', skillStyle: 'dots', upperHeadings: false, photoShape: 'rounded' } },
+  { id: 'fieldnotes', name: 'Field Notes', desc: 'Earthy moss banner and soft ribbons', set: { layout: 'ribbon-cols', theme: 'moss', fontHeading: 'Outfit', fontBody: 'Karla', skillStyle: 'tags', upperHeadings: false, showPhoto: false } },
+  { id: 'dusk', name: 'Dusk', desc: 'Muted purple sidebar with warm highlights', set: { layout: 'sidebar-right', theme: 'dusk', fontHeading: 'Plus Jakarta Sans', fontBody: 'Plus Jakarta Sans', heading: 'underline', skillStyle: 'bars', upperHeadings: false, photoShape: 'circle' } },
+  { id: 'jade', name: 'Jade', desc: 'Split header, fine dividers and tag skills', set: { layout: 'split', columns: 'right', sideStyle: 'plain', theme: 'jade', fontHeading: 'Manrope', fontBody: 'Manrope', heading: 'dot', itemStyle: 'ruled', skillStyle: 'tags', showPhoto: false } },
+  { id: 'mocha', name: 'Mocha', desc: 'Warm centered banner with a modern serif', set: { layout: 'banner-center', theme: 'mocha', fontHeading: 'DM Serif Display', fontBody: 'DM Sans', heading: 'ribbon', skillStyle: 'inline', upperHeadings: false, showPhoto: false, nameSize: 2.8 } },
+  { id: 'ultra', name: 'Ultra', desc: 'Bright blue banner with card entries', set: { layout: 'banner', theme: 'ultramarine', fontHeading: 'Rubik', fontBody: 'Rubik', heading: 'block', itemStyle: 'cards', skillStyle: 'grid', upperHeadings: false, showPhoto: false } },
+  { id: 'glacier', name: 'Glacier', desc: 'Cool timeline with airy spacing', set: { layout: 'timeline', theme: 'glacier', fontHeading: 'Work Sans', fontBody: 'Work Sans', heading: 'line', skillStyle: 'tags', showPhoto: false, sectionGap: 1.5 } },
+  { id: 'bento', name: 'Bento', desc: 'Soft cards and a clean two-column grid', set: { layout: 'cards', theme: 'nebula', fontHeading: 'Outfit', fontBody: 'Inter', heading: 'plain', skillStyle: 'dots', upperHeadings: false, showPhoto: false, nameSize: 2.8 } },
   { id: 'precision', name: 'Precision', desc: 'Compact professional layout with clear dividers', set: { layout: 'compact', theme: 'steel', fontHeading: 'Calibri', fontBody: 'Calibri', heading: 'bracket', itemStyle: 'ruled', skillStyle: 'list', fontSize: 9.5, sectionGap: 0.8, itemGap: 0.4, margin: 10, showPhoto: false } },
 ];
 
@@ -277,7 +302,7 @@ RS.SAMPLES = [
   {
     id: 'software', name: 'Software Engineer',
     make: () => ({
-      basics: { name: 'Alex Skywalker', title: 'Senior Software Engineer', email: 'alex.skywalker@example.com', phone: '+1 555 014 2290', location: 'Seattle, WA', website: 'alexskywalker.example', linkedin: 'linkedin.example/in/alexskywalker', github: 'github.example/alexskywalker', photo: '', links: [] },
+      basics: { name: 'Jaxen Vorr', title: 'Senior Software Engineer', email: 'jaxen.vorr@example.com', phone: '+1 555 014 2290', location: 'Seattle, WA', website: 'jaxenvorr.example', linkedin: 'linkedin.example/in/jaxenvorr', github: 'github.example/jaxenvorr', photo: '', links: [] },
       sections: [
         sec('text', 'Profile', 'Full-stack engineer with 8 years of experience building fast, reliable web platforms. I enjoy turning messy problems into simple systems, mentoring developers and shipping work that customers notice.'),
         sec('experience', 'Experience', [
@@ -286,7 +311,7 @@ RS.SAMPLES = [
           { position: 'Junior Developer', company: 'Pixel & Pine', location: 'Portland, OR', start: 'Jan 2017', end: 'May 2018', description: '- Delivered 20+ client websites and e-commerce stores\n- Automated deployments with CI pipelines' },
         ]),
         sec('projects', 'Projects', [
-          { name: 'Tidewater', role: 'Open-source job queue for Node.js', link: 'github.example/alexskywalker/tidewater', start: '2022', end: '', description: '3.2k stars on GitHub; used in production by 60+ companies.' },
+          { name: 'Tidewater', role: 'Open-source job queue for Node.js', link: 'github.example/jaxenvorr/tidewater', start: '2022', end: '', description: '3.2k stars on GitHub; used in production by 60+ companies.' },
         ]),
         sec('education', 'Education', [
           { degree: 'B.Sc. Computer Science', school: 'University of Washington', location: 'Seattle, WA', start: '2012', end: '2016', description: 'Graduated with honours. Capstone: real-time collaborative editor.' },
