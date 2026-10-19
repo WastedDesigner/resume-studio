@@ -1127,9 +1127,17 @@
     const d = doc.design;
     const [pw, ph] = RS.PAGE[d.pageSize] || RS.PAGE.A4;
     const m = +d.margin || 14;
-    const bg = (html.match(/--page-bg:([^;"]+)/) || [])[1] || '#fff';
+    const bg = (html.match(/--bg:([^;"]+)/) || [])[1] || '#fff';
+    const sideBg = (html.match(/--side-bg:([^;"]+)/) || [])[1] || 'transparent';
+    const filled = d.columns !== 'one' && ['filled', 'tint'].includes(d.sideStyle);
+    const sw = Math.max(20, Math.min(45, +d.sideWidth || 32));
     const unesc = s => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
-    const base = `@media print { html { background: ${unesc(bg)} !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }\n`;
+    // PDF gradient functions can wrap to the opposite colour at x=0, leaving a
+    // white hairline. A fixed solid band repeats on every page without a gradient.
+    const base = `@media print {
+      html { background: ${unesc(bg)} !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      #printRoot::before { ${filled ? `content: ""; position: fixed; top: 0; bottom: 0; ${d.columns === 'right' ? 'right' : 'left'}: 0; width: ${sw}%; background: ${unesc(sideBg)}; z-index: -1; -webkit-print-color-adjust: exact; print-color-adjust: exact;` : 'content: none;'} }
+    }\n`;
     if (clone) {
       // Zero page margins so colour reaches the paper edge; each column fragment
       // repeats its top/bottom padding, which gives every page its margin.
