@@ -75,7 +75,24 @@ RS.loadFont = function (name) {
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(f.name).replace(/%20/g, '+')}:${f.spec}&display=swap`;
-  const p = new Promise(res => { link.onload = res; link.onerror = res; });
+  const p = new Promise(res => {
+    // Loading the stylesheet alone doesn't load fonts in a hidden mobile preview.
+    // Request the actual faces before measuring or opening the print window.
+    const timer = setTimeout(res, 10000);
+    const done = () => { clearTimeout(timer); res(); };
+    link.onerror = done;
+    link.onload = async () => {
+      try {
+        if (document.fonts) {
+          const [axes, values] = f.spec.split('@'), names = axes.split(',');
+          await Promise.allSettled(values.split(';').map(value => {
+            const tuple = value.split(','), at = key => tuple[names.indexOf(key)];
+            return document.fonts.load(`${at('ital') === '1' ? 'italic' : 'normal'} ${at('wght') || 400} 12pt "${f.name}"`);
+          }));
+        }
+      } finally { done(); }
+    };
+  });
   document.head.appendChild(link);
   RS._fontLinks[f.name] = p;
   return p;

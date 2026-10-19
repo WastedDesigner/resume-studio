@@ -300,12 +300,15 @@
         } catch (e) { /* fall back to a text symbol */ }
       })));
     }
-    const iconRun = (key, color) => {
+    // Icon plus the preview's .4em gap, in twips: the hanging indent that keeps wrapped text beside the icon.
+    const iconHang = round(iconPt * 20 + em * .92 * .4);
+    // hang: end with a tab to the hanging indent instead of a space.
+    const iconRun = (key, color, hang = false) => {
       if (key === 'none') return '';
       const rid = iconRel[key + '-' + color], size = round(iconPt * 12700);
-      if (!rid) return run((SYMBOL[key] || '↗') + ' ', { color, font: 'Segoe UI Symbol', sz: round(base * .92) });
+      if (!rid) return run(SYMBOL[key] || '↗', { color, font: 'Segoe UI Symbol', sz: round(base * .92) }) + (hang ? tab : run(' ', { sz: round(base * .92) }));
       // Lower the icon so it centres on the text, as the preview's flex row does.
-      return inlineImage(rid, size, size, 'icon', '', `<w:position w:val="-${round(iconPt * .42)}"/>`) + run(' ', { sz: round(base * .92) });
+      return inlineImage(rid, size, size, 'icon', '', `<w:position w:val="-${round(iconPt * .42)}"/>`) + (hang ? tab : run(' ', { sz: round(base * .92) }));
     };
 
     /* ---------- Header ---------- */
@@ -316,9 +319,18 @@
       const p = banner ? { text: hex(colors.sideText), muted: mix(hex(colors.sideText), hex(colors.side), .82), accent: hex(colors.sideAccent), bg: hex(colors.side) } : palette;
       const small = round(base * .92);
       const prefix = c => d.contactStyle === 'icons' ? iconRun(c.key, p.accent) : d.contactStyle === 'labels' ? run(c.label + ': ', { b: true, color: p.text, sz: small }) : '';
-      const contactText = c => link(c.text, c.url, { color: p.muted, sz: small, b: c.fmt.bold, i: c.fmt.italic, u: c.fmt.underline, s: c.fmt.strike });
+      // Word doesn't have CSS overflow-wrap. Give addresses break opportunities so a
+      // long email or URL can't push its icon onto a separate line in a narrow sidebar.
+      const contactText = c => {
+        const text = ['phone', 'location'].includes(c.key) ? c.text : String(c.text).replace(/([/@._?&=+\-])(?=.)/g, '$1\u200b');
+        return link(text, c.url, { color: p.muted, sz: small, b: c.fmt.bold, i: c.fmt.italic, u: c.fmt.underline, s: c.fmt.strike });
+      };
       const contactLh = em * .92 * d.lineHeight;
-      const contactLine = (c, align) => para(prefix(c) + contactText(c), { align: c.fmt.align || align, after: em * (where === 'side' ? .4 : .25), lh: contactLh });
+      // One contact per line: long emails and URLs wrap beside the icon, not under it.
+      const contactLine = (c, align) => {
+        const a = c.fmt.align || align, hang = d.contactStyle === 'icons' && c.key !== 'none' && a === 'left';
+        return para((hang ? iconRun(c.key, p.accent, true) : prefix(c)) + contactText(c), { align: a, after: em * (where === 'side' ? .4 : .25), lh: contactLh, ind: hang ? iconHang : 0, hang: hang ? iconHang : 0, tabs: hang ? `<w:tab w:val="left" w:pos="${iconHang}"/>` : '' });
+      };
       const name = para(field(d.upperName ? String(basics.name || 'Resume').toUpperCase() : basics.name || 'Resume', f.name, { b: d.boldName, h: true, sz: round(base * d.nameSize * (where === 'side' ? .78 : 1)), color: p.text, sp: d.upperName ? round(d.fontSize * d.nameSize * 1.2) : 0 }), { align: (f.name || {}).align || (center ? 'center' : 'left'), after: em * .2, keep: true, line: round(em * d.nameSize * (where === 'side' ? .78 : 1) * 1.15), exact: true });
       const title = basics.title ? para(field(basics.title, f.title, { h: true, color: p.accent, sz: round(base * (where === 'side' ? 1.05 : 1.2)) }), { align: (f.title || {}).align || (center ? 'center' : 'left'), after: em * .7, keep: true, lh: em * (where === 'side' ? 1.05 : 1.2) * d.lineHeight }) : '';
       const id = name + title;
@@ -343,7 +355,7 @@
     };
 
     /* ---------- Sections ---------- */
-    const heading = (sec, p, first) => {
+    const heading = (sec, p, first, side = false) => {
       const fmt = (sec.formats || {}).title || {}, style = d.heading;
       const upper = d.upperHeadings || style === 'caps';
       let text = upper ? String(sec.title || '').toUpperCase() : sec.title || '';
@@ -354,14 +366,17 @@
             // Bars sit at the paragraph's edge, as in the preview (border, then padding, then text).
       if (style === 'bar') { props.borders = border('left', p.accent, round(d.fontSize * .28 * 8), 'single', round(d.fontSize * .55)); props.ind = em * .83; }
       if (style === 'ribbon') {
-        const fill = mix(p.accent, p.bg, .12), padY = round(d.fontSize * .4);
+        const fill = mix(p.accent, side ? p.bg : theme.bg, side ? .13 : .10), padY = round(d.fontSize * .4);
         props.fill = fill; props.ind = em * .87;
         props.borders = border('top', fill, 4, 'single', padY) + border('left', p.accent, round(d.fontSize * .22 * 8), 'single', round(d.fontSize * .65)) + border('bottom', fill, 4, 'single', padY) + border('right', fill, 4, 'single', round(d.fontSize * .65));
       }
       if (style === 'boxed') props.borders = ['top', 'left', 'bottom', 'right'].map(edge => border(edge, p.accent, 4, 'single', 3)).join('');
       if (style === 'dot') text = '● ' + text;
       if (style === 'bracket') text = '[ ' + text + ' ]';
-      if (style === 'block') { text = ' ' + text + ' '; color = RS.isDark('#' + p.accent) ? 'FFFFFF' : '111111'; }
+      if (style === 'block') {
+        text = ' ' + text + ' ';
+        color = side && d.sideStyle === 'filled' ? (RS.isDark(colors.side) ? '111111' : p.bg) : 'FFFFFF';
+      }
       const size = d.headingSize * (style === 'caps' ? .85 : upper ? .92 : 1);
       const content = field(text, fmt, { h: true, b: true, color, sz: round(base * size), sp: upper || style === 'double' ? round(d.fontSize * size * 2) : 0, u: style === 'underline', shade: style === 'block' ? p.accent : undefined });
       const boxedIn = ['bar', 'ribbon', 'boxed', 'block'].includes(style);
@@ -384,7 +399,8 @@
     const entry = (sec, item, p, w, side, last) => {
       const e = (RS.NORMALISE[sec.type] || RS.NORMALISE.custom)(item), f = RS.entryFormats(sec.type, item);
       const timeline = d.itemStyle === 'timeline', dateLeft = !side && (d.itemStyle === 'dates-left' || d.dateAlign === 'before');
-      const boxed = ['cards', 'bordered'].includes(d.itemStyle), pad = boxed ? round(em * .8) : 0;
+      const sideCard = side && d.itemStyle === 'cards';
+      const boxed = d.itemStyle === 'bordered' || (!side && d.itemStyle === 'cards'), pad = boxed ? round(em * .8) : 0;
       const inner = w - pad * 2 - (timeline ? round(em * 1.4) : 0) - (dateLeft ? round(em * 8.2) : 0);
       const dateRun = e.date ? field(e.date, f.date, { color: d.dateAlign === 'accent' ? p.accent : p.muted, b: d.dateAlign === 'accent', sz: round(base * .9) }) : '';
       const date = e.date ? para(dateRun, { align: (f.date || {}).align || 'left', after: 0, keep: true }) : '';
@@ -393,7 +409,7 @@
       const meta = [e.meta ? field(e.meta, f.meta, { color: p.muted, sz: round(base * .9) }) : '', e.link ? link(RS.prettyUrl(e.link), e.link, { color: p.accent, sz: round(base * .9) }) : ''].filter(Boolean).join(run(' · ', { color: p.muted, sz: round(base * .9) }));
       const descText = e.desc && String(e.desc).trim() ? description(e.desc, f.desc, p) : '';
       // Heading rows; the last one carries the gap before the description (.3em in the preview).
-      const rows = [[titleText + (!dateLeft && !side && dateRun ? tab + dateRun : ''), { align: (f.title || {}).align, tabs: rightTab(inner), pb: item.pageBreak }]];
+      const rows = [[titleText + (!dateLeft && !side && dateRun ? tab + dateRun : ''), { align: (f.title || {}).align, tabs: rightTab(inner) }]];
       if (side) {
         if (subRun) rows.push([subRun, { align: (f.sub || {}).align }]);
         if (meta) rows.push([meta, { align: (f.meta || {}).align }]);
@@ -401,13 +417,19 @@
       } else if (subRun || meta) rows.push([subRun + (meta ? tab + meta : ''), { align: (f.sub || {}).align, tabs: rightTab(inner) }]);
       let content = rows.map(([text, props], n) => para(text, { ...props, keep: true, lh: n ? undefined : em * 1.05 * d.lineHeight, after: n === rows.length - 1 && descText ? em * .3 : 0 })).join('') + descText;
       const gap = last ? 0 : em * d.itemGap;
-      if (timeline) content = table([{ content: para(run('○', { color: p.accent, font: 'Segoe UI Symbol', b: true }), { keep: true }), borders: border('left', mix(p.accent, p.bg, .3), 12), pad: [0, 0, 0, 40] }, { content, pad: [0, 0, round(last ? em * .1 : gap), 0] }], [round(em * 1.4), w - round(em * 1.4)], { keep: true }) + empty();
+      if (d.itemStyle === 'inline') {
+        const joined = [titleText, subRun, dateRun, meta].filter(Boolean).join(run(', ', { color: p.muted }));
+        content = table([para(joined, { keep: !!descText, after: descText ? em * .3 : 0 }) + descText], [w], { keep: true }) + empty(gap);
+      }
+      else if (timeline) content = table([{ content: para(run('○', { color: p.accent, font: 'Segoe UI Symbol', b: true }), { keep: true }), borders: border('left', mix(p.accent, p.bg, .3), 12), pad: [0, 0, 0, 40] }, { content, pad: [0, 0, round(last ? em * .1 : gap), 0] }], [round(em * 1.4), w - round(em * 1.4)], { keep: true }) + empty();
       else if (dateLeft) content = table([date, content], [round(em * 8.2), w - round(em * 8.2)], { keep: true }) + empty(gap);
       else if (boxed) content = table([{ content, pad: [round(em * .7), pad, round(em * .7), pad], fill: d.itemStyle === 'cards' ? mix(p.accent, p.bg, .07) : undefined, borders: d.itemStyle === 'cards' ? border('left', p.accent, 18) : ['top', 'left', 'bottom', 'right'].map(edge => border(edge, mix(p.accent, p.bg, .35), 4)).join('') }], [w], { keep: true }) + empty(gap);
+      else if (sideCard) content = table([{ content, pad: [0, 0, 0, round(em * .7)], borders: border('left', p.accent, 12) }], [w], { keep: true }) + empty(gap);
       else content = table([content], [w], { keep: true }) + empty(gap);
       // Ruled entries: a fine line between entries, with the entry gap on both sides.
       if (d.itemStyle === 'ruled' && !last) content += para('', { after: gap, line: 20, exact: true, borders: border('bottom', mix(p.accent, p.bg, .25), 4) });
-      return content;
+      // Word ignores pageBreakBefore inside a table. Keep the break outside the entry.
+      return (item.pageBreak ? para('', { pb: true, keep: true, after: 0, line: 20, exact: true }) : '') + content;
     };
     const skills = (sec, p, w, side) => {
       const items = (sec.items || []).filter(i => !i.hidden && String(i.name || '').trim());
@@ -415,12 +437,24 @@
       if (['bars', 'dots'].includes(style) && !items.some(i => +i.level > 0)) style = 'list';
       if (sec.type === 'interests' && ['bars', 'dots'].includes(style)) style = 'tags';
       const small = round(base * .88), fmtOf = i => i.formats || {};
-      if (style === 'inline' || style === 'tags') {
-        if (style === 'inline' && items.some(i => i.keywords)) return items.map((i, n) => para(field(i.name + (i.keywords ? ':' : ''), fmtOf(i).name, { b: true, color: p.text }) + (i.keywords ? field(' ' + i.keywords, fmtOf(i).keywords, { color: p.text }) : ''), { after: n < items.length - 1 ? em * .25 : 0 })).join('');
+      if (style === 'tags') {
+        const fill = side && d.sideStyle === 'filled' ? mix(p.text, p.bg, .14) : mix(theme.accent, theme.bg, .12);
+        const tag = (text, fmt, detail = '', detailFmt = {}) => field('\u2009' + text, fmt, { color: p.text, sz: round(base * .9), shade: fill }) +
+          (detail ? field(' ' + detail, detailFmt, { color: p.muted, sz: round(base * .9 * .85), shade: fill }) : '') + run('\u2009', { shade: fill, sz: round(base * .9) });
+        const grouped = items.some(i => i.keywords);
+        if (grouped) return items.map((i, n) => {
+          const f = fmtOf(i), keywords = String(i.keywords || '').split(',').map(s => s.trim()).filter(Boolean);
+          return para(field(i.name, f.name, { b: true, color: p.text }), { keep: !!keywords.length, after: keywords.length ? em * .25 : 0 }) +
+            (keywords.length ? para(keywords.map(k => tag(k, f.keywords)).join(run('  ')), { after: 0, lh: bodyLine * 1.1 }) : '') +
+            (n < items.length - 1 ? empty(em * .55) : '');
+        }).join('');
+        return para(items.map(i => tag(i.name, fmtOf(i).name, i.fluency, fmtOf(i).fluency)).join(run('  ')), { after: 0, lh: bodyLine * 1.1 });
+      }
+      if (style === 'inline') {
+        if (items.some(i => i.keywords)) return items.map((i, n) => para(field(i.name + (i.keywords ? ':' : ''), fmtOf(i).name, { b: true, color: p.text }) + (i.keywords ? field(' ' + i.keywords, fmtOf(i).keywords, { color: p.text }) : ''), { after: n < items.length - 1 ? em * .25 : 0 })).join('');
         return para(items.map(i => {
-          const detail = i.keywords || i.fluency || '';
-          return field(style === 'tags' ? '\u2009' + i.name + '\u2009' : i.name, fmtOf(i).name, { color: p.text, b: !!i.keywords, shade: style === 'tags' ? mix(p.accent, p.bg, .12) : undefined }) + (detail ? field((i.keywords ? ': ' : ' (') + detail + (i.keywords ? '' : ')'), fmtOf(i).keywords || fmtOf(i).fluency, { color: p.muted, sz: round(base * .9) }) : '');
-        }).join(run(style === 'tags' ? '  ' : ' · ', { color: p.accent })), { after: 0, lh: bodyLine * (style === 'tags' ? 1.1 : 1) });
+          return field(i.name, fmtOf(i).name, { color: p.text }) + (i.fluency ? field(' (' + i.fluency + ')', fmtOf(i).fluency, { color: p.text }) : '');
+        }).join(run(' · ', { color: p.accent })), { after: 0 });
       }
       // The preview lays skills out in a grid in the main column, one per row in the sidebar.
       const colGap = round(em * (style === 'list' ? 1.2 : style === 'grid' ? 1.4 : 1.6));
@@ -454,15 +488,30 @@
     };
     const SKILL_TYPES = ['skills', 'languages', 'interests'];
     const section = (sec, p, w, side, first) => {
-      const visible = (sec.items || []).filter(i => !i.hidden);
+      const visible = (sec.items || []).filter(i => {
+        if (i.hidden) return false;
+        if (SKILL_TYPES.includes(sec.type)) return String(i.name || '').trim();
+        const e = (RS.NORMALISE[sec.type] || RS.NORMALISE.custom)(i);
+        return e.title || e.sub || e.desc;
+      });
       if (sec.type === 'text' ? !String(sec.content || '').trim() : !visible.length) return '';
       const hw = !side && d.heading === 'side' ? round(w * .2) : 0;
+      if (hw && !sec._splitBreaks && visible.some(i => i.pageBreak)) {
+        const groups = [];
+        let group = [];
+        for (const item of visible) {
+          if (item.pageBreak && group.length) { groups.push(group); group = []; }
+          group.push(item);
+        }
+        if (group.length) groups.push(group);
+        return groups.map((items, n) => section({ ...sec, items: items.map(i => ({ ...i, pageBreak: false })), _splitBreaks: true, _continued: n > 0, pageBreak: n > 0 || sec.pageBreak || !!items[0].pageBreak }, p, w, side, first && n === 0)).join('');
+      }
       const contentW = w - hw - (hw ? round(em * 2.4) : 0);
       const content = sec.type === 'text' ? description(sec.content, (sec.formats || {}).content, p) : SKILL_TYPES.includes(sec.type) ? skills(sec, p, contentW, side) : visible.map((i, n) => entry(sec, i, p, contentW, side, n === visible.length - 1)).join('');
-      if (sec._continued) return content;
-      if (!hw) return heading(sec, p, first) + content;
-      const head = heading({ ...sec, pageBreak: false }, p, true).replace(/<w:jc w:val="left"\/>/, '<w:jc w:val="right"/>').replace(/<w:pBdr>[\s\S]*?<\/w:pBdr>/, '');
-      return (first ? '' : empty(em * d.sectionGap)) + table([{ content: head, pad: [0, round(em * 1.2), 0, 0] }, { content, pad: [0, 0, 0, round(em * 1.2)], borders: border('left', mix(p.accent, p.bg, .4), 4) }], [hw + round(em * 1.2), w - hw - round(em * 1.2)]) + empty();
+      if (sec._continued && !hw) return content;
+      if (!hw) return heading(sec, p, first, side) + content;
+      const head = sec._continued ? empty() : heading({ ...sec, pageBreak: false }, p, true).replace(/<w:jc w:val="left"\/>/, '<w:jc w:val="right"/>').replace(/<w:pBdr>[\s\S]*?<\/w:pBdr>/, '');
+      return (sec.pageBreak ? para('', { pb: true, after: 0, line: 20, exact: true }) : first ? '' : empty(em * d.sectionGap)) + table([{ content: head, pad: [0, round(em * 1.2), 0, 0] }, { content, pad: [0, 0, 0, round(em * 1.2)], borders: border('left', mix(p.accent, p.bg, .4), 4) }], [hw + round(em * 1.2), w - hw - round(em * 1.2)]) + empty();
     };
     const column = (list, p, w, side, startsAfterHeader) => {
       let out = '', first = !startsAfterHeader;
@@ -489,6 +538,9 @@
       const palette = { bg: sideBg, text: d.sideStyle === 'filled' ? hex(colors.sideText) : theme.text, accent: d.sideStyle === 'filled' ? hex(colors.sideAccent) : theme.accent, muted: d.sideStyle === 'filled' ? mix(hex(colors.sideText), sideBg, .72) : theme.muted };
       if (filled) band = { color: sideBg, x: d.columns === 'left' ? 0 : pageW - bandW, w: bandW };
       const sideW = sideCell - sidePad, mainW = mainCell - mainPad;
+      // A filled sidebar cell reaches into the page margin. Word fades the header's full-height
+      // colour block on screen, so the cell's own fill keeps the margin strip in full colour.
+      const bleed = filled ? margin : 0;
       // Word ignores pageBreakBefore inside table cells. Split the column layout
       // at explicit breaks and place the page break between native tables.
       const partition = list => {
@@ -517,9 +569,9 @@
       for (let part = 0; part < Math.max(sideParts.length, mainParts.length); part++) {
         if (part) body += para('', { pb: true, after: 0, line: 20, exact: true });
         const sideHead = !part && headWhere === 'side', mainHead = !part && headWhere === 'main';
-        const side = { content: (sideHead ? header(sideW, palette, 'side') : '') + column(sideParts[part] || [], palette, sideW, true, sideHead), fill: filled ? sideBg : undefined, pad: left ? [0, sidePad, 0, 0] : [0, 0, 0, sidePad], borders: d.sideStyle === 'rule' ? border(left ? 'right' : 'left', mix(theme.muted, theme.bg, .35), 4) : '' };
+        const side = { content: (sideHead ? header(sideW, palette, 'side') : '') + column(sideParts[part] || [], palette, sideW, true, sideHead), fill: filled ? sideBg : undefined, pad: left ? [0, sidePad, 0, bleed] : [0, bleed, 0, sidePad], borders: d.sideStyle === 'rule' ? border(left ? 'right' : 'left', mix(theme.muted, theme.bg, .35), 4) : '' };
         const main = { content: (mainHead ? header(mainW, theme, 'main') : '') + column(mainParts[part] || [], theme, mainW, false, mainHead), pad: left ? [0, 0, 0, mainPad] : [0, mainPad, 0, 0] };
-        body += table(left ? [side, main] : [main, side], left ? [sideCell, mainCell] : [mainCell, sideCell], { flow: true }) + empty();
+        body += table(left ? [side, main] : [main, side], left ? [sideCell + bleed, mainCell] : [mainCell, sideCell + bleed], { flow: true, ind: left ? -bleed : 0 }) + empty();
       }
     }
     if (bannerTop) {
