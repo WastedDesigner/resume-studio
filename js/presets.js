@@ -150,6 +150,21 @@ RS.THEMES = [
   theme('mocha', 'Mocha', '#7a4e3a', '#efe4da', '#3e2a20', { bg: '#fffcf9' }),
   theme('ultramarine', 'Ultramarine', '#2f47c4', '#e8edfb', '#1b2b6b'),
   theme('glacier', 'Glacier', '#1f6c80', '#e4eff2', '#173a45'),
+  // Muted, single-accent palettes in the current style: deep blues and greens, earthy warms, off-white paper.
+  theme('oxford', 'Oxford Blue', '#1f3a5f', '#14243b', '#e9eef5', { sideAccent: '#9fb8d8' }),
+  theme('pine', 'Pine & Fog', '#2f5446', '#1e3a30', '#edf2ef', { sideAccent: '#a9cbb9' }),
+  theme('clay', 'Clay', '#a14d32', '#3b2a24', '#f6ece6', { sideAccent: '#e7a98f' }),
+  theme('harbour', 'Harbour', '#285e7a', '#e6eef2', '#18384a'),
+  theme('eucalyptus', 'Eucalyptus', '#4a6a59', '#e7eee9', '#22352a', { bg: '#fcfdfc' }),
+  theme('mulberry', 'Mulberry', '#7d2e5a', '#2d1424', '#f6eaf1', { sideAccent: '#e2a6c6' }),
+  theme('ochre', 'Ochre & Charcoal', '#8a5f00', '#26282b', '#f1f1f1', { sideAccent: '#e8b84a' }),
+  theme('cloud', 'Cloud & Ink', '#2b2f36', '#f1eee8', '#2b2f36', { bg: '#fbfaf7', muted: '#5c5e65' }),
+  theme('marine', 'Deep Marine', '#0e5f6b', '#0a3640', '#e6f2f3', { sideAccent: '#7fd0d6' }),
+  theme('sienna', 'Burnt Sienna', '#a84b26', '#fbefe8', '#5a2410'),
+  theme('dustyblue', 'Dusty Blue', '#46607f', '#e9edf3', '#243349'),
+  theme('scarlet', 'Graphite & Scarlet', '#b8322a', '#2b2d31', '#f0f0f1', { sideAccent: '#ff8f80' }),
+  theme('butter', 'Butter & Navy', '#24477a', '#f7efd4', '#1d2b44'),
+  theme('fern', 'Fern', '#3d6b35', '#f0f5ec', '#22401d'),
 ];
 RS.theme = id => RS.THEMES.find(t => t.id === id) || RS.THEMES[0];
 
@@ -181,6 +196,14 @@ RS.LAYOUTS = [
   { id: 'cards-banner', name: 'Banner cards', desc: 'Centered colour header with card entries', set: { columns: 'one', header: 'center', headerBanner: true, itemStyle: 'cards', heading: 'caps' } },
   { id: 'gutter', name: 'Gutter', desc: 'Split header and side-gutter headings', set: { columns: 'one', header: 'split', itemStyle: 'ruled', heading: 'side' } },
   { id: 'ribbon-cols', name: 'Ribbon columns', desc: 'Banner, soft headings and sidebar', set: { columns: 'right', sideStyle: 'tint', header: 'left', headerBanner: true, itemStyle: 'ruled', heading: 'ribbon' } },
+  { id: 'ats-split', name: 'ATS split', desc: 'One column, split header, no graphics', set: { columns: 'one', header: 'split', itemStyle: 'stacked', heading: 'line', contactStyle: 'plain', showPhoto: false, skillStyle: 'inline' } },
+  { id: 'airy', name: 'Airy', desc: 'Centered name, quiet rules, lots of space', set: { columns: 'one', header: 'center', itemStyle: 'ruled', heading: 'plain' } },
+  { id: 'dates-banner', name: 'Banner + dates', desc: 'Colour header, dates in their own column', set: { columns: 'one', header: 'left', headerBanner: true, itemStyle: 'dates-left', heading: 'line' } },
+  { id: 'timeline-banner', name: 'Banner timeline', desc: 'Centered colour header over a timeline', set: { columns: 'one', header: 'center', headerBanner: true, itemStyle: 'timeline', heading: 'caps' } },
+  { id: 'tint-banner', name: 'Banner + soft sidebar', desc: 'Colour header with a tinted side column', set: { columns: 'left', sideStyle: 'tint', header: 'left', headerBanner: true, itemStyle: 'stacked', heading: 'line', sideWidth: 30 } },
+  { id: 'dates-cols', name: 'Dates + side column', desc: 'Dates column beside a divided sidebar', set: { columns: 'right', sideStyle: 'rule', header: 'left', itemStyle: 'dates-left', heading: 'line', sideWidth: 28 } },
+  { id: 'side-cards', name: 'Sidebar cards', desc: 'Filled sidebar, entries on soft cards', set: { columns: 'left', sideStyle: 'filled', header: 'sidebar', itemStyle: 'cards', heading: 'bar' } },
+  { id: 'framed-cols', name: 'Outlined + panel', desc: 'Outlined entries beside a tinted panel', set: { columns: 'right', sideStyle: 'tint', header: 'split', itemStyle: 'bordered', heading: 'underline' } },
 ];
 
 /* ---------- Default design ---------- */
@@ -246,13 +269,30 @@ RS.TEMPLATES = [
   { id: 'glacier', name: 'Glacier', desc: 'Cool timeline with airy spacing', set: { layout: 'timeline', theme: 'glacier', fontHeading: 'Work Sans', fontBody: 'Work Sans', heading: 'line', skillStyle: 'tags', showPhoto: false, sectionGap: 1.5 } },
   { id: 'bento', name: 'Bento', desc: 'Soft cards and a clean two-column grid', set: { layout: 'cards', theme: 'nebula', fontHeading: 'Outfit', fontBody: 'Inter', heading: 'plain', skillStyle: 'dots', upperHeadings: false, showPhoto: false, nameSize: 2.8 } },
   { id: 'precision', name: 'Precision', desc: 'Compact professional layout with clear dividers', set: { layout: 'compact', theme: 'steel', fontHeading: 'Calibri', fontBody: 'Calibri', heading: 'bracket', itemStyle: 'ruled', skillStyle: 'list', fontSize: 9.5, sectionGap: 0.8, itemGap: 0.4, margin: 10, showPhoto: false } },
+  { id: 'oxford', name: 'Oxford', desc: 'ATS-safe single column with a crisp split header', set: { layout: 'ats-split', theme: 'oxford', fontHeading: 'Source Serif 4', fontBody: 'Source Sans 3', fontSize: 10.5, upperHeadings: true } },
+  { id: 'pinewood', name: 'Pinewood', desc: 'Deep green banner over a soft side column', set: { layout: 'tint-banner', theme: 'pine', fontHeading: 'Manrope', fontBody: 'Manrope', skillStyle: 'tags', upperHeadings: false, showPhoto: false } },
+  { id: 'terra', name: 'Terra', desc: 'Earthy clay banner and a clear dates column', set: { layout: 'dates-banner', theme: 'clay', fontHeading: 'DM Serif Display', fontBody: 'DM Sans', skillStyle: 'inline', upperHeadings: false, showPhoto: false, nameSize: 2.7 } },
+  { id: 'harbour', name: 'Harbour', desc: 'Pale blue sidebar with clean skill bars', set: { layout: 'sidebar-left', theme: 'harbour', fontHeading: 'Plus Jakarta Sans', fontBody: 'Plus Jakarta Sans', skillStyle: 'bars', photoShape: 'circle', sideWidth: 31 } },
+  { id: 'eucalyptus', name: 'Eucalyptus', desc: 'Airy serif layout in muted green', set: { layout: 'airy', theme: 'eucalyptus', fontHeading: 'Lora', fontBody: 'Karla', skillStyle: 'inline', upperHeadings: false, showPhoto: false, sectionGap: 1.5 } },
+  { id: 'mulberry', name: 'Mulberry', desc: 'Rich sidebar and soft entry cards', set: { layout: 'side-cards', theme: 'mulberry', fontHeading: 'Sora', fontBody: 'Inter', skillStyle: 'dots', upperHeadings: false, photoShape: 'rounded' } },
+  { id: 'foundry', name: 'Foundry', desc: 'Charcoal banner, ochre timeline, condensed type', set: { layout: 'timeline-banner', theme: 'ochre', fontHeading: 'Oswald', fontBody: 'Barlow', skillStyle: 'tags', showPhoto: false, upperName: true } },
+  { id: 'cloud', name: 'Cloud', desc: 'Off-white paper, ink type and a quiet gutter', set: { layout: 'gutter', theme: 'cloud', fontHeading: 'Inter', fontBody: 'Inter', skillStyle: 'inline', upperHeadings: true, showPhoto: false, nameSize: 2.6 } },
+  { id: 'marine', name: 'Marine', desc: 'Dates column and a divided side panel', set: { layout: 'dates-cols', theme: 'marine', fontHeading: 'IBM Plex Sans', fontBody: 'IBM Plex Sans', skillStyle: 'list', upperHeadings: false, showPhoto: false } },
+  { id: 'sienna', name: 'Sienna', desc: 'Outlined entries beside a warm panel', set: { layout: 'framed-cols', theme: 'sienna', fontHeading: 'Outfit', fontBody: 'Outfit', skillStyle: 'tags', upperHeadings: false, showPhoto: false } },
+  { id: 'consultant', name: 'Consultant', desc: 'Calm dusty blue with a classic split header', set: { layout: 'split', theme: 'dustyblue', fontHeading: 'Lato', fontBody: 'Lato', heading: 'line', skillStyle: 'grid', showPhoto: false } },
+  { id: 'signal', name: 'Signal', desc: 'Graphite banner with scarlet accents', set: { layout: 'banner-cols', theme: 'scarlet', fontHeading: 'Space Grotesk', fontBody: 'Inter', heading: 'bar', skillStyle: 'dots', upperHeadings: false, showPhoto: false } },
+  { id: 'sunday', name: 'Sunday', desc: 'Butter-yellow sidebar and a classic serif', set: { layout: 'sidebar-left', theme: 'butter', fontHeading: 'Libre Baskerville', fontBody: 'Lato', heading: 'line', skillStyle: 'list', upperHeadings: false, photoShape: 'rounded' } },
+  { id: 'fern', name: 'Fern', desc: 'Friendly rounded type on a green timeline', set: { layout: 'timeline', theme: 'fern', fontHeading: 'Nunito', fontBody: 'Nunito', heading: 'underline', skillStyle: 'tags', upperHeadings: false, showPhoto: false } },
 ];
 
 /* Apply a layout or template on top of a design object. */
 RS.applyLayout = function (design, layoutId) {
   const l = RS.LAYOUTS.find(x => x.id === layoutId);
   if (!l) return design;
-  return RS.normHeader(Object.assign(design, { sideStyle: 'filled', headerBanner: false, contactStyle: design.contactStyle === 'pipes' ? 'icons' : design.contactStyle }, l.set, { layout: l.id }));
+  // Contact styles that came with the previous layout (ATS layouts) go back to icons.
+  const prev = RS.LAYOUTS.find(x => x.id === design.layout);
+  const layoutContact = design.contactStyle === 'pipes' || (prev && prev.set.contactStyle && prev.set.contactStyle === design.contactStyle);
+  return RS.normHeader(Object.assign(design, { sideStyle: 'filled', headerBanner: false, contactStyle: layoutContact ? 'icons' : design.contactStyle }, l.set, { layout: l.id }));
 };
 // Older saves stored the colour banner as its own header style.
 RS.normHeader = function (design) {

@@ -3,9 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Resume Studio: free resume builder with PDF export</title>
-  <meta name="description" content="Build a polished resume in your browser and save it as a PDF. Dozens of templates, layouts, themes and fonts. Free, no sign-up, nothing uploaded.">
+  <title>Resume Studio: free resume builder with PDF and Word export</title>
+  <meta name="description" content="Free resume builder that runs in your browser. 59 templates, ATS-friendly layouts, PDF and Word downloads. No sign-up, and nothing you type is uploaded.">
   <meta name="theme-color" content="#4f46e5">
+  <!-- Search and sharing. Update these URLs if the site moves to its own domain. -->
+  <link rel="canonical" href="https://wasteddesigner.github.io/resume-studio/">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Resume Studio">
+  <meta property="og:title" content="Resume Studio: free resume builder with PDF and Word export">
+  <meta property="og:description" content="59 templates, ATS-friendly layouts, PDF and Word downloads. Free, no sign-up, and your resume never leaves your device.">
+  <meta property="og:url" content="https://wasteddesigner.github.io/resume-studio/">
+  <meta property="og:image" content="https://wasteddesigner.github.io/resume-studio/social-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Resume Studio editor beside a finished two-column resume">
+  <meta property="og:locale" content="en_AU">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Resume Studio: free resume builder">
+  <meta name="twitter:description" content="59 templates, ATS-friendly layouts, PDF and Word downloads. Free, private, no sign-up.">
+  <meta name="twitter:image" content="https://wasteddesigner.github.io/resume-studio/social-preview.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Resume Studio",
+    "url": "https://wasteddesigner.github.io/resume-studio/",
+    "description": "Free resume builder that runs in your browser, with 59 templates, ATS-friendly layouts and PDF and Word downloads. No sign-up; resumes stay on your device.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Any (web browser)",
+    "browserRequirements": "Requires JavaScript",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
+    "featureList": ["59 resume templates", "ATS-friendly single-column layouts", "PDF download with selectable text", "Editable Word (.docx) export", "JSON Resume import and export", "Runs in the browser; nothing you type is uploaded"],
+    "image": "https://wasteddesigner.github.io/resume-studio/social-preview.png"
+  }
+  </script>
   <script src="js/theme.js"></script>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +49,15 @@
   <style id="customCss"></style>
 </head>
 <body>
+  <noscript>
+    <div class="noscript">
+      <h1>Resume Studio: free resume builder</h1>
+      <p>Build a professional resume in your browser with 59 templates, ATS-friendly layouts, and PDF and Word downloads. No sign-up, and nothing you type is uploaded.</p>
+      <p><b>Resume Studio needs JavaScript.</b> Turn it on in your browser settings, then reload this page.</p>
+    </div>
+  </noscript>
   <div id="app">
+    <h1 class="sr-only">Resume Studio: free online resume builder with PDF and Word export</h1>
     <header class="topbar">
       <a class="brand" href="./" aria-label="Resume Studio">
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3" width="22" height="26" rx="4" fill="currentColor"/><rect x="10" y="9" width="12" height="2.4" rx="1.2" fill="#fff"/><rect x="10" y="14" width="8" height="2" rx="1" fill="#fff" opacity=".75"/><rect x="10" y="19" width="12" height="2" rx="1" fill="#fff" opacity=".75"/><rect x="10" y="23" width="10" height="2" rx="1" fill="#fff" opacity=".75"/></svg>
@@ -24,6 +65,7 @@
       </a>
       <input id="docName" class="doc-name" aria-label="Resume name" maxlength="80" spellcheck="false">
       <div class="spacer"></div>
+      <button class="privacy-pill" data-act="privacy" title="Your resume stays on this device. Read the privacy policy."><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Private</span><span class="long">&nbsp;· stays on this device</span></button>
       <label class="theme-picker" for="siteTheme"><span>Appearance</span><select id="siteTheme" aria-label="Site appearance">
         <option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option>
       </select></label>
@@ -108,6 +150,31 @@
       <p class="muted small" id="fitText"></p>
       <div class="btn-col" style="flex-direction:row;flex-wrap:wrap"><button type="button" class="btn" data-act="shrinkFit" id="fitBtn">Fit on fewer pages</button></div>
       <div class="dialog-actions"><button value="cancel" class="btn">Done</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="privacyDialog" class="dialog wide privacy-doc" aria-labelledby="privacyTitle">
+    <form method="dialog">
+      <h2 id="privacyTitle" tabindex="-1" autofocus>Privacy policy</h2>
+      <p class="muted small">Last updated 19 October 2026</p>
+      <p class="privacy-lead">Resume Studio runs entirely in your web browser. There is no account, no server that receives your resume, and no tracking.</p>
+      <h3>What we collect</h3>
+      <p>Nothing. There are no analytics, advertising or tracking cookies, and we never see what you type.</p>
+      <h3>Where your resume is kept</h3>
+      <p>In your browser's storage on this device, for this website only. It isn't synced to other devices or browsers. Clearing your browser's data for this site deletes it, so download a backup from <b>Files</b> now and then.</p>
+      <h3>Files you download or import</h3>
+      <p>PDF, Word and other downloads are created on your device and saved where you choose. Files and backup codes you import are read in your browser and never uploaded.</p>
+      <h3>Other services this page contacts</h3>
+      <ul>
+        <li><b>Google Fonts</b> supplies the typefaces when you use them. Like any web request, Google receives your IP address and browser details, but not your resume.</li>
+        <li><b>cdnjs</b> (run by Cloudflare) supplies the free JSZip library the first time you download a Word file.</li>
+        <li><b>Website hosting</b> may keep standard server logs, such as IP addresses, for security.</li>
+      </ul>
+      <p>Links on your resume are only opened if you click them.</p>
+      <h3>Your control</h3>
+      <p>Delete one resume, or every resume, in <b>Files → Privacy</b>. Removing this site's data in your browser settings also deletes everything.</p>
+      <p class="muted small">If this policy changes, the new version will be posted here with a new date.</p>
+      <div class="dialog-actions"><button value="cancel" class="btn primary">Close</button></div>
     </form>
   </dialog>
 

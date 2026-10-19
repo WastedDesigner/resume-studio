@@ -65,7 +65,7 @@
     custom: i => ({ title: i.title, sub: i.subtitle, meta: i.location, date: range(i), link: i.link, desc: i.description }),
   };
 
-  /* ---------- Icons (simple strokes, currentColor) ---------- */
+  /* ---------- Icons (simple strokes, currentColor; the Word export rasterises the same paths) ---------- */
   const ICON = {
     email: '<path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/>',
     phone: '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/>',
@@ -74,8 +74,84 @@
     linkedin: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 10v7"/>',
     github: '<path d="M9 19c-4 1.3-4-2-6-2.5m12 5v-3.5a3 3 0 0 0-.8-2.3c2.8-.3 5.8-1.4 5.8-6.2a4.8 4.8 0 0 0-1.3-3.3 4.5 4.5 0 0 0-.1-3.3s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C6.8 1.6 5.8 1.9 5.8 1.9a4.5 4.5 0 0 0-.1 3.3A4.8 4.8 0 0 0 4.4 8.5c0 4.8 3 5.9 5.8 6.2a3 3 0 0 0-.8 2.3V22"/>',
     link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+    portfolio: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+    blog: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+    code: '<path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+    profile: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    chat: '<path d="M4 5h16v11H9l-5 4z"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    book: '<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/>',
+    camera: '<path d="M4 7h3l2-3h6l2 3h3v13H4z"/><circle cx="12" cy="13" r="4"/>',
+    music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+    art: '<path d="M12 3a9 9 0 0 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+    licence: '<path d="M5 15v-4l2-5h10l2 5v4"/><path d="M3 15h18v3H3zM6 18v2M18 18v2"/><path d="M7.5 12.5h.01M16.5 12.5h.01"/>',
+    idcard: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.4 1.6-2 3-2s2.5.6 3 2M14 10h4M14 13h3"/>',
+    x: '<path d="M4 4h4.5L20 20h-4.5z"/><path d="M20 4l-6.6 7.4M4 20l6.6-7.4"/>',
+    bluesky: '<path d="M12 11C10.5 8 6.5 4 4 4c-1 0-1 1.5-1 2.5S3.5 11 6 11.5c-3 .5-3.5 3-1.5 4.5 3 2.3 5.5-.5 7.5-4 2 3.5 4.5 6.3 7.5 4 2-1.5 1.5-4-1.5-4.5 2.5-.5 3-4 3-5S21 4 20 4c-2.5 0-6.5 4-8 7z"/>',
+    mastodon: '<path d="M20 9.5c0-4-2.6-5.5-8-5.5S4 5.5 4 9.5c0 6 .5 10 6.5 10.5 2 .2 4-.2 5-.7v-2c-1.5.4-3 .6-4.6.5-1.7-.1-2.4-1-2.4-2 3 .7 6 .7 8.5 0 2.5-.9 3-3 3-6.3z"/><path d="M9 13V9.5a1.5 1.5 0 0 1 3 0V12m0-2.5a1.5 1.5 0 0 1 3 0V13"/>',
+    threads: '<path d="M16.5 10.5C16 7.8 14.3 6 11.8 6 8.6 6 6.5 8.4 6.5 12s2.1 6 5.6 6c2.6 0 4.4-1.5 4.4-3.6 0-2-1.5-3.1-4-3.1-2 0-3.1 1-3.1 2.1s1 1.8 2.3 1.8c2.3 0 3.3-1.8 3.3-4.9"/>',
+    facebook: '<path d="M14 21v-8h3l.5-3.5H14V7.5c0-1 .4-1.5 1.6-1.5H18V3h-2.8C12.6 3 11 4.6 11 7.2v2.3H8V13h3v8"/>',
+    instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
+    tiktok: '<path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.7 2.3 4.4 5 4.6"/>',
+    youtube: '<rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/>',
+    vimeo: '<path d="M3 8.5 4.2 10c1.2-1 2-1.4 2.5.4l2 7.5c.6 2 2.2 2.2 3.8.4 2.6-2.8 6.5-8.6 7.4-11.6.7-2.5-1.5-3.8-4.4-2.6-1 .5-1.8 1.6-2 2.8 2-1 3-.3 2 2l-2.2 3.5-2-7.6C10.6 3.9 9 4 6.7 6z"/>',
+    twitch: '<path d="M4 3h16v11l-4 4h-4l-3 3v-3H5V6z"/><path d="M11 7v4M16 7v4"/>',
+    pinterest: '<circle cx="12" cy="12" r="9"/><path d="M11 9.5c-.8 3.5-1.5 7-2.5 10.5M10 13.5c3 1 6-1 6-4.2C16 7 14 5.5 12 5.5c-3 0-5 2-5 4.5 0 1 .4 2 1 2.4"/>',
+    reddit: '<circle cx="12" cy="14" r="7"/><circle cx="18.5" cy="5.5" r="1.5"/><path d="m12 7 1.5-4 3.5 1M9 16.5c1.8 1 4.2 1 6 0M9.3 13h.01M14.7 13h.01"/>',
+    discord: '<path d="M8 6.5c-1.5.3-2.8.8-4 1.5C2.5 11 2 14 2.3 17c1.5 1.1 3 1.8 4.5 2.2l1-1.7M16 6.5c1.5.3 2.8.8 4 1.5 1.5 3 2 6 1.7 9-1.5 1.1-3 1.8-4.5 2.2l-1-1.7"/><path d="M7 17c3 1.3 7 1.3 10 0M7.5 7.5c3-1 6-1 9 0"/><circle cx="9" cy="13" r="1.2"/><circle cx="15" cy="13" r="1.2"/>',
+    telegram: '<path d="M21 4 3 11l6 2 2 6 3-4 5 4z"/><path d="m9 13 8-6"/>',
+    whatsapp: '<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.5-2-1-1 .8a5 5 0 0 1-2.8-2.8l.8-1-1-2z"/>',
+    spotify: '<circle cx="12" cy="12" r="9"/><path d="M7 9.5c3.5-1 7-.6 10 1M7.5 12.8c3-.8 5.8-.4 8.3.9M8 15.8c2.4-.6 4.6-.3 6.5.7"/>',
+    soundcloud: '<path d="M10 17V9.5A5 5 0 0 1 19.5 12a3 3 0 0 1 .5 5z"/><path d="M4 16v-3M7 17v-6"/>',
+    dribbble: '<circle cx="12" cy="12" r="9"/><path d="M6 5.5c4 4.5 8 7 13.5 6.5M3.5 14c5-2 10-1.5 14 4M9 3.5c3 4 5 9 6 17"/>',
+    behance: '<path d="M3 6h5a2.5 2.5 0 0 1 0 5H3zM3 11h6a3 3 0 0 1 0 6H3z"/><path d="M14 13.5h7a3.5 3.5 0 1 0-1 2.5M15 7h5"/>',
+    figma: '<path d="M9 3h3v6H9a3 3 0 0 1 0-6zM12 3h3a3 3 0 0 1 0 6h-3zM9 9h3v6H9a3 3 0 0 1 0-6zM12 15v3a3 3 0 1 1-3-3z"/><circle cx="15" cy="12" r="3"/>',
+    medium: '<ellipse cx="7" cy="12" rx="5" ry="5.5"/><ellipse cx="16" cy="12" rx="2.5" ry="5"/><path d="M21 7v10"/>',
+    substack: '<path d="M5 4h14M5 8h14M5 12h14v9l-7-4-7 4z"/>',
+    gitlab: '<path d="m12 21-9-7 2.5-10 2.5 7h8l2.5-7 2.5 10z"/>',
+    bitbucket: '<path d="M3 4h18l-2.5 16h-13z"/><path d="M9.5 14h5l1-5h-7z"/>',
+    stackoverflow: '<path d="M5 14v6h13v-6"/><path d="M8.5 17h6M9 13.6l6 1.3M10 10.2l5.6 2.6M12 6.8l4.8 3.9M14.8 3.6l3.6 4.9"/>',
+    codepen: '<path d="M12 3 3 9v6l9 6 9-6V9z"/><path d="M12 3v6M12 15v6M3 9l9 6 9-6M3 15l9-6 9 6"/>',
+    kaggle: '<path d="M7 3v18M17 4l-7 8 7.5 9"/>',
+    orcid: '<circle cx="12" cy="12" r="9"/><path d="M8.5 10.5V16M8.5 8v.01M11.5 8v8h2a4 4 0 0 0 0-8z"/>',
+    scholar: '<path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',
+    researchgate: '<path d="M5 20V5h4.5a3.5 3.5 0 0 1 0 7H5m4 0 4 8"/><path d="M20 6h-2.5A2.5 2.5 0 0 0 15 8.5v1a2.5 2.5 0 0 0 2.5 2.5H20V9h-2"/>',
   };
-  const icon = k => `<svg class="rs-ico" viewBox="0 0 24 24" aria-hidden="true">${ICON[k] || ICON.link}</svg>`;
+  // Picker order and names for extra links. 'auto' guesses from the address; 'none' shows no icon.
+  RS.LINK_ICONS = [
+    ['auto', 'Automatic'], ['none', 'No icon'], ['link', 'Link'], ['website', 'Website'], ['portfolio', 'Portfolio'], ['blog', 'Blog'],
+    ['code', 'Code'], ['profile', 'Profile'], ['email', 'Email'], ['phone', 'Phone'], ['chat', 'Chat'], ['calendar', 'Calendar / booking'],
+    ['book', 'Publications'], ['camera', 'Photography'], ['music', 'Music'], ['art', 'Art'], ['licence', "Driver's licence"], ['idcard', 'ID / registration'],
+    ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['gitlab', 'GitLab'], ['bitbucket', 'Bitbucket'], ['stackoverflow', 'Stack Overflow'], ['codepen', 'CodePen'],
+    ['kaggle', 'Kaggle'], ['x', 'X (Twitter)'], ['bluesky', 'Bluesky'], ['mastodon', 'Mastodon'], ['threads', 'Threads'], ['facebook', 'Facebook'],
+    ['instagram', 'Instagram'], ['tiktok', 'TikTok'], ['youtube', 'YouTube'], ['vimeo', 'Vimeo'], ['twitch', 'Twitch'], ['pinterest', 'Pinterest'],
+    ['reddit', 'Reddit'], ['discord', 'Discord'], ['telegram', 'Telegram'], ['whatsapp', 'WhatsApp'], ['spotify', 'Spotify'], ['soundcloud', 'SoundCloud'],
+    ['dribbble', 'Dribbble'], ['behance', 'Behance'], ['figma', 'Figma'], ['medium', 'Medium'], ['substack', 'Substack'],
+    ['orcid', 'ORCID'], ['scholar', 'Google Scholar'], ['researchgate', 'ResearchGate'],
+  ];
+  const GUESS = [
+    [/linkedin\./, 'linkedin'], [/github\./, 'github'], [/gitlab\./, 'gitlab'], [/bitbucket\./, 'bitbucket'], [/stackoverflow\.|stackexchange\./, 'stackoverflow'],
+    [/codepen\./, 'codepen'], [/kaggle\./, 'kaggle'], [/(^|\.)(x|twitter)\.com/, 'x'], [/bsky\./, 'bluesky'], [/mastodon|fosstodon|hachyderm/, 'mastodon'],
+    [/threads\.(net|com)/, 'threads'], [/facebook\.|fb\.com/, 'facebook'], [/instagram\./, 'instagram'], [/tiktok\./, 'tiktok'], [/youtube\.|youtu\.be/, 'youtube'],
+    [/vimeo\./, 'vimeo'], [/twitch\./, 'twitch'], [/pinterest\./, 'pinterest'], [/reddit\./, 'reddit'], [/discord\./, 'discord'], [/t\.me|telegram\./, 'telegram'],
+    [/wa\.me|whatsapp\./, 'whatsapp'], [/spotify\./, 'spotify'], [/soundcloud\./, 'soundcloud'], [/dribbble\./, 'dribbble'], [/behance\./, 'behance'],
+    [/figma\./, 'figma'], [/medium\.com/, 'medium'], [/substack\./, 'substack'], [/orcid\./, 'orcid'], [/scholar\.google/, 'scholar'], [/researchgate\./, 'researchgate'],
+    [/calendly\.|cal\.com/, 'calendar'], [/^mailto:|@/, 'email'], [/^tel:/, 'phone'],
+  ];
+  RS.ICONS = ICON;
+  // Icon for an extra link: the person's choice, else a guess from its address or label.
+  RS.linkIcon = function (l) {
+    const pick = l && l.icon;
+    if (pick && pick !== 'auto' && (pick === 'none' || ICON[pick])) return pick;
+    const url = String((l && l.url) || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
+    const hit = GUESS.find(([re]) => re.test(url));
+    if (hit) return hit[1];
+    const label = String((l && l.label) || '').toLowerCase().replace(/[^a-z]/g, '');
+    const named = RS.LINK_ICONS.find(([id, name]) => id !== 'auto' && id !== 'none' && (label === id || label === name.toLowerCase().replace(/[^a-z]/g, '')));
+    return named ? named[0] : 'link';
+  };
+  const icon = k => k === 'none' ? '' : `<svg class="rs-ico" viewBox="0 0 24 24" aria-hidden="true">${ICON[k] || ICON.link}</svg>`;
+  RS.iconSvg = icon;
   const LABEL = { email: 'Email', phone: 'Phone', location: 'Location', website: 'Web', linkedin: 'LinkedIn', github: 'GitHub' };
 
   function contacts(b, d) {
@@ -87,7 +163,7 @@
     add('website', b.website && prettyUrl(b.website), b.website && safeUrl(b.website));
     add('linkedin', b.linkedin && prettyUrl(b.linkedin), b.linkedin && safeUrl(b.linkedin));
     add('github', b.github && prettyUrl(b.github), b.github && safeUrl(b.github));
-    (b.links || []).forEach(l => add('link', l.url ? prettyUrl(l.url) : '', safeUrl(l.url), l.label || 'Link', (l.formats || {}).url));
+    (b.links || []).forEach(l => add(RS.linkIcon(l), l.url ? prettyUrl(l.url) : '', safeUrl(l.url), l.label || 'Link', (l.formats || {}).url || {}));
     if (!list.length) return '';
     const st = d.contactStyle;
     // Allow line breaks after @ and /, instead of mid-word.

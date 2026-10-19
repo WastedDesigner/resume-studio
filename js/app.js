@@ -9,6 +9,8 @@
   const KEY = 'resume-studio:v1';
   // Versioned so people who hid the old tip see the Microsoft Print to PDF warning once.
   const SKIP_PDF_TIP = 'resume-studio:skip-pdf-tip-2';
+  // Set once a visitor dismisses the first-visit privacy card.
+  const PRIVACY_SEEN = 'resume-studio:privacy-seen';
 
   /* ---------- Storage ---------- */
   let store = { current: null, docs: Object.create(null) };
@@ -116,7 +118,7 @@
     for (const k of ['name', 'title', 'email', 'phone', 'location', 'website', 'linkedin', 'github']) basics[k] = str(bs[k]);
     basics.formats = RS.cleanFormats(bs.formats);
     basics.photo = typeof bs.photo === 'string' && /^data:image\/(png|jpe?g|webp|gif);base64,[a-z0-9+/=]+$/i.test(bs.photo) ? bs.photo : '';
-    basics.links = Array.isArray(bs.links) ? bs.links.slice(0, 20).map(l => ({ label: str(l && l.label), url: str(l && l.url), formats: RS.cleanFormats(l && l.formats) })) : [];
+    basics.links = Array.isArray(bs.links) ? bs.links.slice(0, 20).map(l => ({ label: str(l && l.label), url: str(l && l.url), icon: RS.LINK_ICONS.some(([id]) => id === (l && l.icon)) ? l.icon : 'auto', formats: RS.cleanFormats(l && l.formats) })) : [];
     const ids = new Set();
     const uniqueId = value => {
       let id = str(value);
@@ -382,7 +384,14 @@
     const b = doc.data.basics;
     const two = doc.design.columns !== 'one';
     const photo = b.photo ? `<img src="${esc(b.photo)}" alt="">` : IC.user;
-    let html = `<div class="text-tools" id="textTools" role="toolbar" aria-label="Text formatting"><div class="text-tools-label" id="textTarget">Click a text field to format it</div><div class="text-tools-row">
+    // First visit: say up front that nothing leaves the device.
+    let html = lsGet(PRIVACY_SEEN) ? '' : `<section class="privacy-card" aria-labelledby="privacyCardTitle">
+      <div class="lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+      <h3 id="privacyCardTitle">Your resume stays on this device</h3>
+      <ul><li>No account or sign-up</li><li>Nothing you type is uploaded or shared</li><li>Saved only in this browser. Delete it any time in Files</li></ul>
+      <div class="row"><button class="btn small" data-act="privacy">Read the privacy policy</button><button class="btn small primary" data-act="privacyOk">Got it</button></div>
+    </section>`;
+    html += `<div class="text-tools" id="textTools" role="toolbar" aria-label="Text formatting"><div class="text-tools-label" id="textTarget">Click a text field to format it</div><div class="text-tools-row">
       ${[['bold', '<b>B</b>', 'Bold'], ['italic', '<i>I</i>', 'Italic'], ['underline', '<u>U</u>', 'Underline'], ['strike', '<s>S</s>', 'Strikethrough']].map(([key, label, title]) => `<button type="button" class="text-tool" data-act="textStyle" data-key="${key}" aria-label="${title}" title="${title}" aria-pressed="false" disabled>${label}</button>`).join('')}
       <span class="tool-divider"></span>
       ${[['left', 'M3 4h14M3 8h9M3 12h14M3 16h9', 'Align left'], ['center', 'M3 4h14M6 8h8M3 12h14M6 16h8', 'Align centre'], ['right', 'M3 4h14M8 8h9M3 12h14M8 16h9', 'Align right'], ['justify', 'M3 4h14M3 8h14M3 12h14M3 16h14', 'Justify']].map(([key, path, title]) => `<button type="button" class="text-tool" data-act="textAlign" data-key="${key}" aria-label="${title}" title="${title}" aria-pressed="false" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="${path}"/></svg></button>`).join('')}
@@ -407,7 +416,9 @@
           ${field('LinkedIn', 'basics.linkedin', b.linkedin, { half: true })}
           ${field('GitHub', 'basics.github', b.github, { half: true })}
         </div>
-        <div class="links-list">${(b.links || []).map((l, i) => `<div class="link-row">
+        <div class="links-list">${(b.links || []).length ? '<p class="md-help" style="margin:0 0 2px">Extra links: pick an icon, or leave it on Automatic to match the website.</p>' : ''}${(b.links || []).map((l, i) => `<div class="link-row">
+            <span class="link-ico" aria-hidden="true">${RS.iconSvg(RS.linkIcon(l))}</span>
+            <select class="input link-icon" aria-label="Icon for this link" data-path="basics.links.${i}.icon">${RS.LINK_ICONS.map(([id, name]) => `<option value="${id}"${(l.icon || 'auto') === id ? ' selected' : ''}>${esc(name)}</option>`).join('')}</select>
             <input class="input" placeholder="Label" aria-label="Link label" value="${esc(l.label)}" data-path="basics.links.${i}.label">
             <input class="input" placeholder="URL" aria-label="Link URL" value="${esc(l.url)}" data-path="basics.links.${i}.url">
             <button class="icon-btn" data-act="delLink" data-i="${i}" aria-label="Remove link">${IC.trash}</button></div>`).join('')}
@@ -556,7 +567,10 @@
 
     html += `<div class="group-title">Custom CSS</div>
       <label class="field"><textarea class="code" data-design="customCss" spellcheck="false" placeholder=".rs-name { letter-spacing: .05em; }&#10;.rs-h { color: #0a7; }">${esc(d.customCss)}</textarea><span class="hint">For advanced tweaks. Rules only apply to the resume. Classes start with .rs-</span></label>
-      <button class="btn small danger" data-act="resetDesign" style="margin-top:12px">Reset design to template</button>`;
+      <div class="btn-col" style="flex-direction:row;flex-wrap:wrap;margin-top:12px">
+        <button class="btn small danger" data-act="resetDesign">Reset design to template</button>
+        <button class="btn small danger" data-act="resetDefault">Reset to default template</button>
+      </div>`;
 
     const pane = $('#tab-design');
     const st = pane.scrollTop;
@@ -567,7 +581,8 @@
   /* ---------- Templates tab ---------- */
   function buildTemplates() {
     const d = doc.design;
-    let html = `<div class="group-title">${RS.TEMPLATES.length} templates</div><p class="muted small" style="margin:-4px 2px 10px">Pick a look. Your content stays the same; you can fine-tune everything in Design.</p><div class="tpl-grid">`;
+    let html = `<div class="group-title">${RS.TEMPLATES.length} templates</div><p class="muted small" style="margin:-4px 2px 8px">Pick a look. Your content stays the same; you can fine-tune everything in Design.</p>
+      <button class="btn small" data-act="resetDefault" style="margin:0 2px 12px">Reset to default template</button><div class="tpl-grid">`;
     html += RS.TEMPLATES.map(t => `<button class="tpl ${d.template === t.id ? 'on' : ''}" data-act="template" data-id="${t.id}"><div class="thumb" data-tpl="${t.id}"></div><div class="tpl-name">${esc(t.name)}</div><small class="tpl-desc">${esc(t.desc || (RS.LAYOUTS.find(l => l.id === t.set.layout) || {}).desc || '')}</small></button>`).join('');
     html += '</div><div class="group-title">Sample content</div><p class="muted small" style="margin:-4px 2px 10px">Start from an example resume for your field. This replaces the content of the current resume (your design is kept), so make a new resume in Files first if you want to keep this one.</p><div class="sample-list">';
     html += RS.SAMPLES.map(s => `<div class="sample"><span>${esc(s.name)}</span><button class="btn small" data-act="sample" data-id="${s.id}">Use</button></div>`).join('');
@@ -650,7 +665,7 @@
       <button class="btn block" data-act="importPaste" style="margin-top:8px">Import pasted text</button>
 
       <div class="group-title">Privacy</div>
-      <div class="note">Everything you type stays in this browser. Nothing is uploaded or shared, and there is no account. Clearing your browser data deletes your resumes, so download a backup now and then.</div>
+      <div class="note">Everything you type stays in this browser. Nothing is uploaded or shared, and there is no account. Clearing your browser data deletes your resumes, so download a backup now and then. <button class="btn small" data-act="privacy" style="margin-top:8px">Read the privacy policy</button></div>
       <div class="btn-col" style="flex-direction:row;flex-wrap:wrap;margin-top:12px">
         <button class="btn small danger" data-act="startBlank">Clear this resume</button>
         <button class="btn small danger" data-act="wipe">Delete all resumes from this browser</button>
@@ -902,7 +917,7 @@
     zoomFit: () => { ui.zoom = 'fit'; fitZoom(); },
     toggleBasics: () => { ui.basicsOpen = !ui.basicsOpen; buildContent(); },
     removePhoto: () => { doc.data.basics.photo = ''; changed({ rebuild: true, immediate: true }); },
-    addLink: () => { doc.data.basics.links.push({ label: '', url: '' }); changed({ rebuild: true, immediate: true }); },
+    addLink: () => { doc.data.basics.links.push({ label: '', url: '', icon: 'auto' }); changed({ rebuild: true, immediate: true }); },
     delLink: el => { doc.data.basics.links.splice(+el.dataset.i, 1); changed({ rebuild: true, immediate: true }); },
     toggleSec: el => { const id = el.dataset.id; ui.openSecs.has(id) ? ui.openSecs.delete(id) : ui.openSecs.add(id); buildContent(); },
     toggleItem: el => { const id = el.dataset.id; ui.openItems.has(id) ? ui.openItems.delete(id) : ui.openItems.add(id); buildContent(); },
@@ -936,6 +951,8 @@
     },
     secBreak: el => { const s = secAt(el); s.pageBreak = !s.pageBreak; changed({ rebuild: true, immediate: true }); toast(s.pageBreak ? `"${s.title}" now starts on a new page` : 'Page break removed'); },
     openPages: () => { buildPages(); $('#pagesDialog').showModal(); },
+    privacy: () => { const dlg = $('#privacyDialog'); if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', ''); },
+    privacyOk: () => { lsSet(PRIVACY_SEEN, '1'); buildContent(); toast('You can read the privacy policy any time from the Private button at the top.'); },
     addBreak: () => {
       const v = $('#pageBreakAt').value;
       if (!v) return;
@@ -977,6 +994,14 @@
     theme: el => { doc.design.theme = el.dataset.id; doc.design.accent = ''; doc.design.sideColor = ''; doc.design.template = ''; changed({ design: true, immediate: true }); },
     resetColors: () => { doc.design.accent = ''; doc.design.sideColor = ''; changed({ design: true, immediate: true }); },
     columns: el => { doc.design.columns = el.dataset.v; fixColumns(); doc.design.template = ''; changed({ rebuild: true, immediate: true }); },
+    // Back to the look a new resume starts with; content, paper size and custom CSS are kept.
+    resetDefault: () => {
+      doc.design = RS.applyTemplate(doc.design, RS.DEFAULT_DESIGN.template);
+      fixColumns();
+      changed({ rebuild: true, immediate: true });
+      markTemplate();
+      toast(`Reset to the default ${RS.TEMPLATES.find(t => t.id === RS.DEFAULT_DESIGN.template).name} template. Your content is kept.`, 'Undo', () => histGo(-1));
+    },
     resetDesign: () => { doc.design = RS.applyTemplate(doc.design, doc.design.template || 'modern'); changed({ rebuild: true, immediate: true }); toast('Design reset'); },
     template: el => { doc.design = RS.applyTemplate(doc.design, el.dataset.id); fixColumns(); changed({ rebuild: true, immediate: true }); markTemplate(); toast(`${RS.TEMPLATES.find(t => t.id === el.dataset.id).name} template applied`); },
     sample: el => {
@@ -1280,6 +1305,8 @@ ${scopeCss(doc.design.customCss)}
       setPath(doc.data, el.dataset.path, v);
       if (doc.isSample && el.dataset.path === 'basics.name') doc.isSample = false;
       if (el.type === 'range') { const o = el.parentElement.querySelector('output'); if (o) o.textContent = levelText(v); }
+      const linkRow = el.closest('.link-row');
+      if (linkRow) $('.link-ico', linkRow).innerHTML = RS.iconSvg(RS.linkIcon(getPath(doc.data, el.dataset.path.replace(/\.[^.]+$/, ''))));
       const item = el.closest('.item');
       if (item) {
         const si = +el.closest('.sec').dataset.si, s = doc.data.sections[si];
