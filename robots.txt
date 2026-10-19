@@ -1,7 +1,6 @@
-# Crawlers only read robots.txt at the root of a domain. On GitHub Pages this
-# file sits in a subfolder and is ignored; it takes effect if the site moves to
-# its own domain. Submit sitemap.xml in Google Search Console meanwhile.
+# Served at the root of resume-builder.wasteddesigner.com. The GitHub Pages copy
+# sits in a subfolder, so crawlers ignore it there; its canonical tag points here.
 User-agent: *
 Allow: /
 
-Sitemap: https://wasteddesigner.github.io/resume-studio/sitemap.xml
+Sitemap: https://resume-builder.wasteddesigner.com/sitemap.xml
