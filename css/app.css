@@ -352,3 +352,31 @@ svg { stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; 
 .guide span button { border: 0; background: rgba(255,255,255,.25); color: #fff; border-radius: 3px; width: 16px; height: 16px; line-height: 14px; padding: 0; font: 700 13px/14px system-ui, sans-serif; cursor: pointer; }
 .guide span button:hover { background: rgba(255,255,255,.45); }
 .stage-bar .btn.small svg { width: 15px; height: 15px; }
+
+/* ---------- WastedDesigner skin: the wasteddesigner.com look, layered on the dark theme ---------- */
+:root[data-skin="wasteddesigner"] {
+  --ui-bg: #060606;
+  --ui-panel: #0c0c0c;
+  --ui-card: #111111;
+  --ui-soft: #181818;
+  --ui-line: #262626;
+  --ui-text: #eae7df;
+  --ui-muted: #92978d;
+  --ui-accent: #c8ff00;
+  --ui-accent-soft: color-mix(in srgb, #c8ff00 12%, transparent);
+  --ui-stage: #000000;
+  --ui-radius: 12px;
+  --ui-shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 6px 18px rgba(0, 0, 0, .4);
+}
+:root[data-skin="wasteddesigner"] body { font-family: 'Instrument Sans', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+:root[data-skin="wasteddesigner"] ::selection { background: #c8ff00; color: #060606; }
+:root[data-skin="wasteddesigner"] .topbar { background: color-mix(in srgb, #060606 80%, transparent); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+:root[data-skin="wasteddesigner"] .brand span { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; }
+:root[data-skin="wasteddesigner"] .brand svg rect + rect { fill: #060606; }
+:root[data-skin="wasteddesigner"] .btn { border-radius: 100px; }
+:root[data-skin="wasteddesigner"] .btn.primary { color: #060606; }
+:root[data-skin="wasteddesigner"] .btn.primary:hover { filter: none; background: #d6ff40; }
+:root[data-skin="wasteddesigner"] .switch input:checked + span::after { background: #060606; }
+:root[data-skin="wasteddesigner"] .tabs button,
+:root[data-skin="wasteddesigner"] .theme-picker > span { text-transform: uppercase; letter-spacing: 1px; font-size: 12px; }
+:root[data-skin="wasteddesigner"] #toast { background: #c8ff00; color: #060606; }

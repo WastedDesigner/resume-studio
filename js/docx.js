@@ -25,10 +25,147 @@
     return canvas.toDataURL('image/png').split(',')[1];
   }
 
+  /* ---------- Embedded fonts ---------- */
+  // Word swaps web fonts it hasn't got for Calibri or Georgia, which changes every line break.
+  // Static TTF instances come from Fontsource on jsDelivr (Google Fonts are OFL, so embedding
+  // is allowed). Only the font name and style are requested; offline, the file just goes without.
+  const FONT_CDN = 'https://cdn.jsdelivr.net/fontsource/fonts/';
+  const fontFiles = new Map();
+  function fetchFont(url) {
+    if (!fontFiles.has(url)) {
+      const loading = (async () => {
+        const abort = new AbortController(), timer = setTimeout(() => abort.abort(), 10000);
+        try {
+          const res = await fetch(url, { signal: abort.signal, credentials: 'omit', referrerPolicy: 'no-referrer' });
+          if (!res.ok) throw new Error('Font ' + res.status);
+          return new Uint8Array(await res.arrayBuffer());
+        } finally { clearTimeout(timer); }
+      })();
+      loading.catch(() => fontFiles.delete(url));
+      fontFiles.set(url, loading);
+    }
+    return fontFiles.get(url);
+  }
+  // The styles a family has, read from its Google Fonts axis string ('ital,wght@0,400;0,700;1,400').
+  function fontStyles(spec) {
+    const [axes, values] = String(spec || 'wght@400').split('@'), names = axes.split(',');
+    return [...new Set(values.split(';').map(v => {
+      const tuple = v.split(','), at = name => tuple[names.indexOf(name)];
+      const italic = names.includes('ital') && at('ital') === '1', weight = names.includes('wght') ? +at('wght') : 400;
+      return weight >= 700 ? (italic ? 'BoldItalic' : 'Bold') : italic ? 'Italic' : 'Regular';
+    }))];
+  }
+  const STYLE = { Regular: ['400-normal', 'Regular'], Bold: ['700-normal', 'Bold'], Italic: ['400-italic', 'Italic'], BoldItalic: ['700-italic', 'Bold Italic'] };
+
+  function sfntTables(bytes) {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), tables = {};
+    if (![0x00010000, 0x74727565].includes(view.getUint32(0))) throw new Error('Not a TrueType font');
+    for (let i = 0, n = view.getUint16(4); i < n; i++) {
+      const at = 12 + i * 16, tag = String.fromCharCode(...bytes.subarray(at, at + 4));
+      tables[tag] = bytes.subarray(view.getUint32(at + 8), view.getUint32(at + 8) + view.getUint32(at + 12));
+    }
+    return tables;
+  }
+  // Characters a font can draw, from its Windows Unicode cmap (formats 4 and 12).
+  function fontCovers(tables) {
+    const cmap = tables.cmap, view = new DataView(cmap.buffer, cmap.byteOffset, cmap.byteLength), ranges = [];
+    let at = -1;
+    for (let i = 0, n = view.getUint16(2); i < n; i++) {
+      const platform = view.getUint16(4 + i * 8), encoding = view.getUint16(6 + i * 8);
+      if (platform === 3 && (encoding === 10 || (encoding === 1 && at < 0))) at = view.getUint32(8 + i * 8);
+    }
+    const format = at < 0 ? 0 : view.getUint16(at);
+    if (format === 4) {
+      const segs = view.getUint16(at + 6) / 2, ends = at + 14, starts = ends + segs * 2 + 2;
+      for (let i = 0; i < segs; i++) ranges.push([view.getUint16(starts + i * 2), view.getUint16(ends + i * 2)]);
+    } else if (format === 12) {
+      for (let i = 0, n = view.getUint32(at + 12); i < n; i++) ranges.push([view.getUint32(at + 16 + i * 12), view.getUint32(at + 20 + i * 12)]);
+    }
+    return cp => ranges.some(([a, b]) => cp >= a && cp <= b);
+  }
+  // Fontsource's instances of variable fonts can keep the variable font's default name
+  // ("Montserrat Thin"), and Word only uses an embedded font whose family name matches.
+  function renameFont(tables, family, style) {
+    const old = tables.name, view = new DataView(old.buffer, old.byteOffset, old.byteLength);
+    const records = [], storage = view.getUint16(4);
+    for (let i = 0, n = view.getUint16(2); i < n; i++) {
+      const at = 6 + i * 12, id = view.getUint16(at + 6);
+      if (view.getUint16(at) !== 3 || [1, 2, 3, 4, 6, 16, 17, 21, 22, 25].includes(id)) continue;
+      const start = storage + view.getUint16(at + 10);
+      records.push([view.getUint16(at + 2), view.getUint16(at + 4), id, old.subarray(start, start + view.getUint16(at + 8))]);
+    }
+    const utf16 = s => { const out = new Uint8Array(s.length * 2); for (let i = 0; i < s.length; i++) { out[i * 2] = s.charCodeAt(i) >> 8; out[i * 2 + 1] = s.charCodeAt(i) & 255; } return out; };
+    const full = style === 'Regular' ? family : family + ' ' + style;
+    [[1, family], [2, style], [3, full + '; Resume Studio'], [4, full], [6, (family + '-' + style).replace(/[^A-Za-z0-9-]/g, '')]]
+      .forEach(([id, text]) => records.push([1, 0x409, id, utf16(text)]));
+    records.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
+    const size = 6 + records.length * 12, total = records.reduce((sum, r) => sum + r[3].length, size);
+    const out = new Uint8Array(total), w = new DataView(out.buffer);
+    w.setUint16(2, records.length); w.setUint16(4, size);
+    let offset = 0;
+    records.forEach(([encoding, language, id, data], i) => {
+      const at = 6 + i * 12;
+      w.setUint16(at, 3); w.setUint16(at + 2, encoding); w.setUint16(at + 4, language); w.setUint16(at + 6, id);
+      w.setUint16(at + 8, data.length); w.setUint16(at + 10, offset);
+      out.set(data, size + offset); offset += data.length;
+    });
+    tables.name = out;
+  }
+  function writeSfnt(tables) {
+    const tags = Object.keys(tables).sort(), n = tags.length, pad = x => (x + 3) & ~3;
+    const sum = (bytes, start, length) => { let s = 0; const v = new DataView(bytes.buffer, bytes.byteOffset); for (let i = 0; i < length; i += 4) s = (s + v.getUint32(start + i)) >>> 0; return s; };
+    let offset = 12 + n * 16;
+    const total = tags.reduce((t, tag) => t + pad(tables[tag].length), offset), out = new Uint8Array(total), w = new DataView(out.buffer);
+    const log = Math.floor(Math.log2(n));
+    w.setUint32(0, 0x00010000); w.setUint16(4, n); w.setUint16(6, 16 << log); w.setUint16(8, log); w.setUint16(10, n * 16 - (16 << log));
+    let head = 0;
+    tags.forEach((tag, i) => {
+      const data = tables[tag], at = 12 + i * 16;
+      out.set(data, offset);
+      if (tag === 'head') { head = offset; w.setUint32(offset + 8, 0); }
+      for (let c = 0; c < 4; c++) out[at + c] = tag.charCodeAt(c);
+      w.setUint32(at + 4, sum(out, offset, pad(data.length))); w.setUint32(at + 8, offset); w.setUint32(at + 12, data.length);
+      offset += pad(data.length);
+    });
+    if (head) w.setUint32(head + 8, (0xB1B0AFBA - sum(out, 0, total)) >>> 0);
+    return out;
+  }
+  // ECMA-376 Part 1, 17.8.1: XOR the first 32 bytes with the font key, read backwards.
+  function obfuscate(bytes, key) {
+    const hexKey = key.replace(/[{}-]/g, ''), out = bytes.slice();
+    for (let i = 0; i < 32; i++) out[i] ^= parseInt(hexKey.substr(30 - (i % 16) * 2, 2), 16);
+    return out;
+  }
+  const fontKey = () => {
+    const b = crypto.getRandomValues(new Uint8Array(16)), h = Array.from(b, x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+    return `{${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}}`;
+  };
+  // -> { familyName: { covers(codePoint), files: [{ style, bytes }] } }. The files hold Fontsource's
+  // Latin subset; runs put any other character in the fallback font.
+  async function loadEmbeddedFonts(names) {
+    const out = {};
+    await Promise.all([...new Set(names)].map(async name => {
+      const f = RS.font(name);
+      if (f.name !== name || f.cat === 'System') return;
+      const id = f.name.toLowerCase().replace(/\s+/g, '-');
+      try {
+        const files = await Promise.all(fontStyles(f.spec).map(async style => {
+          const tables = sfntTables(await fetchFont(`${FONT_CDN}${id}@latest/latin-${STYLE[style][0]}.ttf`));
+          renameFont(tables, f.name, STYLE[style][1]);
+          return { style, bytes: writeSfnt(tables) };
+        }));
+        out[name] = { covers: fontCovers(sfntTables(files[0].bytes)), files };
+      } catch { /* offline or blocked: Word uses the alternative font instead */ }
+    }));
+    return out;
+  }
+
   RS.buildDocx = async function (doc, JSZip) {
     const d = RS.normHeader({ ...RS.DEFAULT_DESIGN, ...doc.design }), data = doc.data || {}, basics = data.basics || {};
     const colors = RS.colors(d), zip = new JSZip(), relationships = [];
     const font = RS.font(d.fontBody).name, headingFont = RS.font(d.fontHeading).name;
+    const fallback = name => { const f = RS.font(name); return f.cat === 'System' ? f.name : { Serif: 'Georgia', Slab: 'Cambria', Mono: 'Consolas', Display: 'Arial Narrow' }[f.cat] || 'Calibri'; };
+    const embedded = await loadEmbeddedFonts([font, headingFont]);
     const base = round(d.fontSize * 2), em = d.fontSize * 20;
     // CSS line-height is a multiple of the font size; Word's "auto" multiplies the font's own
     // (taller) line, so use an "at least" height to match the preview line for line.
@@ -45,7 +182,20 @@
 
     /* ---------- Runs, paragraphs and tables ---------- */
     const fonts = p => `<w:rFonts w:ascii="${esc(p.h ? headingFont : p.font || font)}" w:hAnsi="${esc(p.h ? headingFont : p.font || font)}" w:eastAsia="${esc(p.h ? headingFont : p.font || font)}" w:cs="${esc(p.h ? headingFont : p.font || font)}"/>`;
-    const run = (text, p = {}) => `<w:r><w:rPr>${fonts(p)}${p.b ? '<w:b/>' : ''}${p.i ? '<w:i/>' : ''}${p.s ? '<w:strike/>' : ''}<w:color w:val="${hex(p.color, theme.text)}"/><w:sz w:val="${round(p.sz || base)}"/><w:szCs w:val="${round(p.sz || base)}"/>${p.u ? '<w:u w:val="single"/>' : ''}${p.sp ? `<w:spacing w:val="${round(p.sp)}"/>` : ''}${p.shade ? `<w:shd w:val="clear" w:fill="${hex(p.shade)}"/>` : ''}</w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r>`;
+    // Characters an embedded font lacks get their own run in the fallback font; left to Word,
+    // the substitute spreads to the neighbouring text.
+    const run = (text, p = {}) => {
+      const name = p.h ? headingFont : p.font || font, covers = embedded[name] && embedded[name].covers;
+      if (!covers) return runXml(text, p);
+      let out = '', piece = '', drawn = true;
+      for (const ch of String(text)) {
+        const ok = covers(ch.codePointAt(0));
+        if (ok !== drawn && piece) { out += runXml(piece, drawn ? p : { ...p, h: false, font: fallback(name) }); piece = ''; }
+        piece += ch; drawn = ok;
+      }
+      return out + runXml(piece, drawn ? p : { ...p, h: false, font: fallback(name) });
+    };
+    const runXml = (text, p) => `<w:r><w:rPr>${fonts(p)}${p.b ? '<w:b/>' : ''}${p.i ? '<w:i/>' : ''}${p.s ? '<w:strike/>' : ''}<w:color w:val="${hex(p.color, theme.text)}"/><w:sz w:val="${round(p.sz || base)}"/><w:szCs w:val="${round(p.sz || base)}"/>${p.u ? '<w:u w:val="single"/>' : ''}${p.sp ? `<w:spacing w:val="${round(p.sp)}"/>` : ''}${p.shade ? `<w:shd w:val="clear" w:fill="${hex(p.shade)}"/>` : ''}</w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r>`;
     const tab = '<w:r><w:tab/></w:r>';
     const rich = (text, p = {}) => RS.richRuns(text).map(r => {
       const content = run(r.t, { ...p, b: p.b || r.b, i: p.i || r.i, u: p.u || r.u, s: p.s || r.s });
@@ -393,19 +543,26 @@
       parts.push(['header1', 'header']);
     }
     const hasJustifiedField = [basics, ...sections, ...sections.flatMap(s => s.items || [])].some(o => Object.values(o.formats || {}).some(f => f.align === 'justify'));
-    const settings = `${XML}<w:settings xmlns:w="${W}"><w:autoHyphenation w:val="${d.hyphenate !== false && (d.justify || hasJustifiedField) ? 'true' : 'false'}"/><w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>`;
+    const fontRels = [];
+    const embeds = name => (embedded[name] ? embedded[name].files : []).sort((a, b) => Object.keys(STYLE).indexOf(a.style) - Object.keys(STYLE).indexOf(b.style)).map(({ style, bytes }) => {
+      const key = fontKey(), id = `rId${fontRels.length + 1}`, file = `font${fontRels.length + 1}.odttf`;
+      zip.file('word/fonts/' + file, obfuscate(bytes, key));
+      fontRels.push(`<Relationship Id="${id}" Type="${R}/font" Target="fonts/${file}"/>`);
+      return `<w:embed${style} r:id="${id}" w:fontKey="${key}"/>`;
+    }).join('');
+    const settings = `${XML}<w:settings xmlns:w="${W}">${Object.keys(embedded).length ? '<w:embedTrueTypeFonts/>' : ''}<w:autoHyphenation w:val="${d.hyphenate !== false && (d.justify || hasJustifiedField) ? 'true' : 'false'}"/><w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>`;
     const styles = `${XML}<w:styles xmlns:w="${W}"><w:docDefaults><w:rPrDefault><w:rPr>${fonts({})}<w:color w:val="${theme.text}"/><w:sz w:val="${base}"/><w:lang w:val="en-AU"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="${bodyLine}" w:lineRule="exact"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style><w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:outlineLvl w:val="0"/></w:pPr></w:style></w:styles>`;
-    const fallback = name => { const f = RS.font(name); return f.cat === 'System' ? f.name : { Serif: 'Georgia', Slab: 'Cambria', Mono: 'Consolas', Display: 'Arial Narrow' }[f.cat] || 'Calibri'; };
-    const fontTable = `${XML}<w:fonts xmlns:w="${W}">${[...new Set([font, headingFont, 'Segoe UI Symbol'])].map(name => `<w:font w:name="${esc(name)}"><w:altName w:val="${esc(fallback(name))}"/></w:font>`).join('')}</w:fonts>`;
+    const fontTable = `${XML}<w:fonts xmlns:w="${W}" xmlns:r="${R}">${[...new Set([font, headingFont, 'Segoe UI Symbol'])].map(name => `<w:font w:name="${esc(name)}"><w:altName w:val="${esc(fallback(name))}"/>${embeds(name)}</w:font>`).join('')}</w:fonts>`;
     const documentXml = `${XML}<w:document ${NS}><w:background w:color="${theme.bg}"/><w:body>${body}<w:sectPr>${headerRef}<w:pgSz w:w="${pageW}" w:h="${pageH}"/><w:pgMar w:top="${margin}" w:right="${margin}" w:bottom="${margin}" w:left="${margin}" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr></w:body></w:document>`;
     for (const [name, content] of [['document', documentXml], ['styles', styles], ['settings', settings], ['fontTable', fontTable]]) {
       zip.file(`word/${name}.xml`, content);
       if (name !== 'document') relationship(name, `${name}.xml`);
     }
+    if (fontRels.length) zip.file('word/_rels/fontTable.xml.rels', `${XML}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${fontRels.join('')}</Relationships>`);
     zip.file('word/_rels/document.xml.rels', `${XML}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${relationships.join('')}</Relationships>`);
     zip.file('_rels/.rels', `${XML}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`);
     zip.file('docProps/core.xml', `${XML}<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${esc((basics.name || 'Resume') + ' – Resume')}</dc:title><dc:creator>${esc(basics.name)}</dc:creator></cp:coreProperties>`);
-    zip.file('[Content_Types].xml', `${XML}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/>${parts.map(([name, type]) => `<Override PartName="/word/${name}.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.${type}+xml"/>`).join('')}<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`);
+    zip.file('[Content_Types].xml', `${XML}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/>${fontRels.length ? '<Default Extension="odttf" ContentType="application/vnd.openxmlformats-officedocument.obfuscatedFont"/>' : ''}${parts.map(([name, type]) => `<Override PartName="/word/${name}.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.${type}+xml"/>`).join('')}<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`);
     return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', compression: 'DEFLATE' });
   };
 })();

@@ -4,15 +4,29 @@
   const RS = window.RS = window.RS || {};
   const key = 'resume-studio:appearance';
   const system = window.matchMedia('(prefers-color-scheme: dark)');
-  const valid = value => ['system', 'light', 'dark'].includes(value) ? value : 'system';
+  const valid = value => ['system', 'light', 'dark', 'wasteddesigner'].includes(value) ? value : 'system';
+  // The WastedDesigner skin matches wasteddesigner.com: a dark base with its own colours and fonts.
+  const SKIN_FONTS = 'https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Orbitron:wght@600;700&display=swap';
   let preference = 'system';
   try { preference = valid(localStorage.getItem(key)); } catch (e) { /* use the system preference */ }
 
+  function loadSkinFonts() {
+    if (document.getElementById('skinFonts')) return;
+    const link = document.createElement('link');
+    link.id = 'skinFonts';
+    link.rel = 'stylesheet';
+    link.href = SKIN_FONTS;
+    document.head.appendChild(link);
+  }
+
   function apply() {
-    const mode = preference === 'system' ? (system.matches ? 'dark' : 'light') : preference;
+    const skin = preference === 'wasteddesigner';
+    const mode = skin ? 'dark' : preference === 'system' ? (system.matches ? 'dark' : 'light') : preference;
     document.documentElement.dataset.theme = mode;
+    if (skin) { document.documentElement.dataset.skin = 'wasteddesigner'; loadSkinFonts(); }
+    else delete document.documentElement.dataset.skin;
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = mode === 'dark' ? '#1b1e24' : '#ffffff';
+    if (meta) meta.content = skin ? '#060606' : mode === 'dark' ? '#1b1e24' : '#ffffff';
     const picker = document.getElementById('siteTheme');
     if (picker) picker.value = preference;
   }
