@@ -104,6 +104,7 @@ RS.PAIRINGS = [
   ['Libre Baskerville', 'Source Sans 3'], ['DM Serif Display', 'DM Sans'], ['Space Grotesk', 'Inter'], ['Oswald', 'Roboto'],
   ['Josefin Sans', 'Nunito'], ['IBM Plex Mono', 'IBM Plex Sans'], ['Bitter', 'Fira Sans'], ['Cormorant Garamond', 'Karla'],
   ['Sora', 'Manrope'], ['Crimson Pro', 'Crimson Pro'], ['Roboto Slab', 'Roboto'], ['Arial', 'Arial'], ['Georgia', 'Georgia'],
+  ['Calibri', 'Calibri'], ['Montserrat', 'Source Sans 3'], ['Georgia', 'Arial'],
 ];
 
 /* ---------- Themes ---------- */
