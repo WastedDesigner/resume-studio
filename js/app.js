@@ -815,6 +815,7 @@
       [!['bars', 'dots'].includes(d.skillStyle), 'Skills are written as text, not bars or dots'],
       [!(d.showPhoto && b.photo), 'No photo (ATS ignore images)'],
       [d.fontSize >= 9.5, 'Text is 9.5 pt or larger'],
+      [!/Firefox\//.test(navigator.userAgent), 'PDF is saved from Chrome or Edge (Firefox PDFs can lose dashes and brackets)'],
       [!(d.justify && d.hyphenate), 'No hyphenated words (hyphens split keywords)'],
       [has(/experience|employment|work history|career/i), 'Has an Experience section with a standard title'],
       [has(/education|qualification|training/i), 'Has an Education section with a standard title'],
