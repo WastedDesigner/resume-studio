@@ -313,8 +313,10 @@
 
     /* ---------- Header ---------- */
     let bannerTop = '';
+    // ATS layouts export as plain paragraphs: parsers can read tables out of order.
+    const plain = d.layout === 'ats' || d.layout === 'ats-split';
     const header = (w, palette, where) => {
-      const center = where !== 'side' && d.header === 'center', split = where !== 'side' && d.header === 'split';
+      const center = where !== 'side' && d.header === 'center', split = !plain && where !== 'side' && d.header === 'split';
       const banner = where !== 'side' && d.headerBanner, f = basics.formats || {};
       const p = banner ? { text: hex(colors.sideText), muted: mix(hex(colors.sideText), hex(colors.side), .82), accent: hex(colors.sideAccent), bg: hex(colors.side) } : palette;
       const small = round(base * .92);
@@ -417,7 +419,8 @@
       } else if (subRun || meta) rows.push([subRun + (meta ? tab + meta : ''), { align: (f.sub || {}).align, tabs: rightTab(inner) }]);
       let content = rows.map(([text, props], n) => para(text, { ...props, keep: true, lh: n ? undefined : em * 1.05 * d.lineHeight, after: n === rows.length - 1 && descText ? em * .3 : 0 })).join('') + descText;
       const gap = last ? 0 : em * d.itemGap;
-      if (d.itemStyle === 'inline') {
+      if (plain) content += empty(gap);
+      else if (d.itemStyle === 'inline') {
         const joined = [titleText, subRun, dateRun, meta].filter(Boolean).join(run(', ', { color: p.muted }));
         content = table([para(joined, { keep: !!descText, after: descText ? em * .3 : 0 }) + descText], [w], { keep: true }) + empty(gap);
       }

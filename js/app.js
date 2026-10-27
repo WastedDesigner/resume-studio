@@ -795,6 +795,7 @@
     });
     if ((ui.pages || 1) > 2) add('improve', `Your resume runs to ${ui.pages} pages. Two pages suits most roles; try the Compact template, a smaller text size or trimming older jobs.`, null);
     if (doc.design.showPhoto && b.photo) add('improve', 'Your photo is shown. Many employers in the US, UK, Canada and Australia prefer resumes without photos.', { tab: 'design' });
+    if (doc.design.columns !== 'one' || doc.design.heading === 'side') add('improve', 'Sidebars and side headings can be read out of order by applicant tracking systems. For online applications, choose a single-column template such as ATS Friendly, Plain Pro or Oxford.', { tab: 'templates' });
     return out;
   }
   function checkSummary(issues) {
