@@ -148,13 +148,15 @@
 .rs-row2 { margin-top: .05em; }
 .rs-desc { margin-top: .3em; }
 .rs-desc ul { list-style: none; }
-.rs-desc li { position: relative; padding-left: 1.05em; margin-bottom: .15em; }
-.rs-desc li::before { position: absolute; left: 0; top: 0; color: var(--accent); content: "•"; font-weight: 700; }
+/* Bullets are inline, not positioned: Firefox paints positioned boxes after everything else, which
+   pulled every entry's bullets out of order in the PDF text. */
+.rs-desc li { padding-left: 1.05em; text-indent: -1.05em; margin-bottom: .15em; }
+.rs-desc li::before { display: inline-block; width: 1.05em; text-indent: 0; color: var(--accent); content: "•"; font-weight: 700; }
 .rs-bullet-dash .rs-desc li::before { content: "–"; }
 .rs-bullet-arrow .rs-desc li::before { content: "▸"; }
 .rs-bullet-check .rs-desc li::before { content: "✓"; }
 .rs-bullet-square .rs-desc li::before { content: "▪"; }
-.rs-bullet-none .rs-desc li { padding-left: 0; }
+.rs-bullet-none .rs-desc li { padding-left: 0; text-indent: 0; }
 .rs-bullet-none .rs-desc li::before { content: none; }
 .rs-desc a, .rs-link { color: var(--accent); }
 .rs-text { margin-top: 0; }

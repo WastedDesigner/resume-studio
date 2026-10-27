@@ -166,8 +166,8 @@
     (b.links || []).forEach(l => add(RS.linkIcon(l), l.url ? prettyUrl(l.url) : '', safeUrl(l.url), l.label || 'Link', (l.formats || {}).url || {}));
     if (!list.length) return '';
     const st = d.contactStyle;
-    // Allow line breaks after @ and /, instead of mid-word.
-    const soft = s => esc(s).replace(/(@|\/)/g, '$1<wbr>');
+    // No <wbr> hints: they split an email or link into separate text runs that ATS parsers read as two words.
+    const soft = esc;
     const items = list.map(c => {
       const text = c.href ? `<a href="${esc(c.href)}">${soft(c.text)}</a>` : soft(c.text);
       const pre = st === 'icons' ? icon(c.k) : st === 'labels' ? `<b class="rs-clabel">${esc(c.label)}:</b> ` : '';

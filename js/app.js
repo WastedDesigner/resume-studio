@@ -815,6 +815,7 @@
       [!['bars', 'dots'].includes(d.skillStyle), 'Skills are written as text, not bars or dots'],
       [!(d.showPhoto && b.photo), 'No photo (ATS ignore images)'],
       [d.fontSize >= 9.5, 'Text is 9.5 pt or larger'],
+      [!(d.justify && d.hyphenate), 'No hyphenated words (hyphens split keywords)'],
       [has(/experience|employment|work history|career/i), 'Has an Experience section with a standard title'],
       [has(/education|qualification|training/i), 'Has an Education section with a standard title'],
       [has(/skill|competenc/i), 'Has a Skills section with a standard title'],
