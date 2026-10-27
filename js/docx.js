@@ -160,8 +160,15 @@
     return out;
   }
 
+  const flatten = d => ({ ...d, columns: 'one', headerBanner: false, showPhoto: false, header: d.header === 'center' ? 'center' : 'left',
+    heading: d.heading === 'side' ? 'line' : d.heading, itemStyle: d.itemStyle === 'ruled' ? 'ruled' : 'stacked',
+    dateAlign: d.dateAlign === 'before' ? 'right' : d.dateAlign, contactStyle: d.contactStyle === 'icons' ? 'plain' : d.contactStyle,
+    skillStyle: d.skillStyle === 'tags' ? 'tags' : 'inline' });
+
   RS.buildDocx = async function (doc, JSZip) {
-    const d = RS.normHeader({ ...RS.DEFAULT_DESIGN, ...doc.design }), data = doc.data || {}, basics = data.basics || {};
+    // Word files are for applicant tracking systems, which read tables, columns, images and icons out of
+    // order. Keep fonts, colours and heading styles, but flatten the structure to one column of plain text.
+    const d = flatten(RS.normHeader({ ...RS.DEFAULT_DESIGN, ...doc.design })), data = doc.data || {}, basics = data.basics || {};
     const colors = RS.colors(d), zip = new JSZip(), relationships = [];
     const font = RS.font(d.fontBody).name, headingFont = RS.font(d.fontHeading).name;
     const fallback = name => { const f = RS.font(name); return f.cat === 'System' ? f.name : { Serif: 'Georgia', Slab: 'Cambria', Mono: 'Consolas', Display: 'Arial Narrow' }[f.cat] || 'Calibri'; };
@@ -313,10 +320,8 @@
 
     /* ---------- Header ---------- */
     let bannerTop = '';
-    // ATS layouts export as plain paragraphs: parsers can read tables out of order.
-    const plain = d.layout === 'ats' || d.layout === 'ats-split';
     const header = (w, palette, where) => {
-      const center = where !== 'side' && d.header === 'center', split = !plain && where !== 'side' && d.header === 'split';
+      const center = where !== 'side' && d.header === 'center', split = where !== 'side' && d.header === 'split';
       const banner = where !== 'side' && d.headerBanner, f = basics.formats || {};
       const p = banner ? { text: hex(colors.sideText), muted: mix(hex(colors.sideText), hex(colors.side), .82), accent: hex(colors.sideAccent), bg: hex(colors.side) } : palette;
       const small = round(base * .92);
@@ -324,7 +329,7 @@
       // Word doesn't have CSS overflow-wrap. Give addresses break opportunities so a
       // long email or URL can't push its icon onto a separate line in a narrow sidebar.
       const contactText = c => {
-        const text = ['phone', 'location'].includes(c.key) ? c.text : String(c.text).replace(/([/@._?&=+\-])(?=.)/g, '$1\u200b');
+        const text = where !== 'side' || ['phone', 'location'].includes(c.key) ? c.text : String(c.text).replace(/([/@._?&=+\-])(?=.)/g, '$1\u200b');
         return link(text, c.url, { color: p.muted, sz: small, b: c.fmt.bold, i: c.fmt.italic, u: c.fmt.underline, s: c.fmt.strike });
       };
       const contactLh = em * .92 * d.lineHeight;
@@ -419,8 +424,7 @@
       } else if (subRun || meta) rows.push([subRun + (meta ? tab + meta : ''), { align: (f.sub || {}).align, tabs: rightTab(inner) }]);
       let content = rows.map(([text, props], n) => para(text, { ...props, keep: true, lh: n ? undefined : em * 1.05 * d.lineHeight, after: n === rows.length - 1 && descText ? em * .3 : 0 })).join('') + descText;
       const gap = last ? 0 : em * d.itemGap;
-      if (plain) content += empty(gap);
-      else if (d.itemStyle === 'inline') {
+      if (d.itemStyle === 'inline') {
         const joined = [titleText, subRun, dateRun, meta].filter(Boolean).join(run(', ', { color: p.muted }));
         content = table([para(joined, { keep: !!descText, after: descText ? em * .3 : 0 }) + descText], [w], { keep: true }) + empty(gap);
       }
@@ -428,7 +432,7 @@
       else if (dateLeft) content = table([date, content], [round(em * 8.2), w - round(em * 8.2)], { keep: true }) + empty(gap);
       else if (boxed) content = table([{ content, pad: [round(em * .7), pad, round(em * .7), pad], fill: d.itemStyle === 'cards' ? mix(p.accent, p.bg, .07) : undefined, borders: d.itemStyle === 'cards' ? border('left', p.accent, 18) : ['top', 'left', 'bottom', 'right'].map(edge => border(edge, mix(p.accent, p.bg, .35), 4)).join('') }], [w], { keep: true }) + empty(gap);
       else if (sideCard) content = table([{ content, pad: [0, 0, 0, round(em * .7)], borders: border('left', p.accent, 12) }], [w], { keep: true }) + empty(gap);
-      else content = table([content], [w], { keep: true }) + empty(gap);
+      else content += empty(gap);
       // Ruled entries: a fine line between entries, with the entry gap on both sides.
       if (d.itemStyle === 'ruled' && !last) content += para('', { after: gap, line: 20, exact: true, borders: border('bottom', mix(p.accent, p.bg, .25), 4) });
       // Word ignores pageBreakBefore inside a table. Keep the break outside the entry.

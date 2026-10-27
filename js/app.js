@@ -795,15 +795,44 @@
     });
     if ((ui.pages || 1) > 2) add('improve', `Your resume runs to ${ui.pages} pages. Two pages suits most roles; try the Compact template, a smaller text size or trimming older jobs.`, null);
     if (doc.design.showPhoto && b.photo) add('improve', 'Your photo is shown. Many employers in the US, UK, Canada and Australia prefer resumes without photos.', { tab: 'design' });
-    if (doc.design.columns !== 'one' || doc.design.heading === 'side') add('improve', 'Sidebars and side headings can be read out of order by applicant tracking systems. For online applications, choose a single-column template such as ATS Friendly, Plain Pro or Oxford.', { tab: 'templates' });
+    if (doc.design.columns !== 'one' || doc.design.heading === 'side') add('improve', 'Word downloads are always flattened to one plain column for applicant tracking systems. In the PDF, sidebars and side headings can still be read out of order, so for online applications choose a single-column template such as ATS Friendly, Plain Pro or Oxford.', { tab: 'templates' });
     return out;
   }
   function checkSummary(issues) {
     const fixes = issues.filter(i => i.lvl === 'fix').length;
     return { fixes, score: Math.max(0, 100 - fixes * 15 - (issues.length - fixes) * 5) };
   }
+  /* ---------- Live ATS check (shown on the preview) ---------- */
+  function atsCheck() {
+    const d = doc.design, b = doc.data.basics, secs = doc.data.sections.filter(s => s.visible !== false);
+    const has = re => secs.some(s => re.test(s.title || '') && (s.type === 'text' ? String(s.content || '').trim() : s.items.some(i => !i.hidden)));
+    const jobs = secs.filter(s => s.type === 'experience').flatMap(s => s.items.filter(i => !i.hidden));
+    const skills = secs.filter(s => s.type === 'skills').flatMap(s => s.items.filter(i => !i.hidden));
+    const list = [
+      [!!b.name.trim(), 'Your name is at the top as plain text'],
+      [!!b.email.trim() && !!b.phone.trim(), 'Email and phone are both listed'],
+      [d.columns === 'one' && d.heading !== 'side', 'Single column, so text is read in the right order'],
+      [!['bars', 'dots'].includes(d.skillStyle), 'Skills are written as text, not bars or dots'],
+      [!(d.showPhoto && b.photo), 'No photo (ATS ignore images)'],
+      [d.fontSize >= 9.5, 'Text is 9.5 pt or larger'],
+      [has(/experience|employment|work history|career/i), 'Has an Experience section with a standard title'],
+      [has(/education|qualification|training/i), 'Has an Education section with a standard title'],
+      [has(/skill|competenc/i), 'Has a Skills section with a standard title'],
+      [jobs.length > 0 && jobs.every(j => String(j.start || '').trim()), 'Every job has a start date'],
+      [skills.length >= 5, 'Five or more skills listed as keywords'],
+      [(ui.pages || 1) <= 2, 'Two pages or fewer'],
+    ];
+    return { list, score: Math.round(list.filter(x => x[0]).length / list.length * 100) };
+  }
+  function updateAts() {
+    const { list, score } = atsCheck(), tone = score >= 85 ? 'good' : score >= 60 ? 'mid' : 'low';
+    $('#atsPill').className = 'ats-pill ' + tone;
+    $('#atsPill').innerHTML = `ATS <b>${score}</b>`;
+    $('#atsPanel').innerHTML = `<div class="ats-head"><b>ATS check</b><span class="ats-score ${tone}">${score}%</span></div><ul>${list.map(([ok, t]) => `<li class="${ok ? 'ok' : 'no'}"><span aria-hidden="true">${ok ? '✓' : '✕'}</span>${esc(t)}</li>`).join('')}</ul><p class="muted small">Live check of this resume. Word downloads are always flattened to plain single-column text.</p>`;
+  }
   let lastIssues = [];
   function updateCheck() {
+    updateAts();
     lastIssues = runCheck();
     const { fixes } = checkSummary(lastIssues);
     const tab = $('.tabs [data-tab=check]');
@@ -951,6 +980,7 @@
       toast(`Removed "${(t.label && t.label(it)) || 'entry'}"`, 'Undo', () => histGo(-1));
     },
     secBreak: el => { const s = secAt(el); s.pageBreak = !s.pageBreak; changed({ rebuild: true, immediate: true }); toast(s.pageBreak ? `"${s.title}" now starts on a new page` : 'Page break removed'); },
+    atsToggle: () => { const p = $('#atsPanel'); p.hidden = !p.hidden; $('#atsPill').setAttribute('aria-expanded', String(!p.hidden)); },
     openPages: () => { buildPages(); $('#pagesDialog').showModal(); },
     privacy: () => { const dlg = $('#privacyDialog'); if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', ''); },
     privacyOk: () => { lsSet(PRIVACY_SEEN, '1'); buildContent(); toast('You can read the privacy policy any time from the Private button at the top.'); },

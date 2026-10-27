@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Resume Studio: free resume builder with PDF and Word export</title>
-  <meta name="description" content="Free resume builder that runs in your browser. 65 templates, ATS-friendly layouts, PDF and Word downloads. No sign-up, and nothing you type is uploaded.">
+  <meta name="description" content="Free resume builder that runs in your browser. 17 templates, ATS-friendly layouts, PDF and Word downloads. No sign-up, and nothing you type is uploaded.">
   <meta name="theme-color" content="#4f46e5">
   <!-- Search and sharing. The canonical home is the subdomain; the GitHub Pages copy points here too. -->
   <link rel="canonical" href="https://resume-builder.wasteddesigner.com/">
@@ -13,7 +13,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Resume Studio">
   <meta property="og:title" content="Resume Studio: free resume builder with PDF and Word export">
-  <meta property="og:description" content="65 templates, ATS-friendly layouts, PDF and Word downloads. Free, no sign-up, and your resume never leaves your device.">
+  <meta property="og:description" content="17 templates, ATS-friendly layouts, PDF and Word downloads. Free, no sign-up, and your resume never leaves your device.">
   <meta property="og:url" content="https://resume-builder.wasteddesigner.com/">
   <meta property="og:image" content="https://resume-builder.wasteddesigner.com/social-preview.png">
   <meta property="og:image:width" content="1200">
@@ -23,7 +23,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@WastedDesigner">
   <meta name="twitter:title" content="Resume Studio: free resume builder">
-  <meta name="twitter:description" content="65 templates, ATS-friendly layouts, PDF and Word downloads. Free, private, no sign-up.">
+  <meta name="twitter:description" content="17 templates, ATS-friendly layouts, PDF and Word downloads. Free, private, no sign-up.">
   <meta name="twitter:image" content="https://resume-builder.wasteddesigner.com/social-preview.png">
   <script type="application/ld+json">
   {
@@ -31,13 +31,13 @@
     "@type": "WebApplication",
     "name": "Resume Studio",
     "url": "https://resume-builder.wasteddesigner.com/",
-    "description": "Free resume builder that runs in your browser, with 65 templates, ATS-friendly layouts and PDF and Word downloads. No sign-up; resumes stay on your device.",
+    "description": "Free resume builder that runs in your browser, with 17 templates, ATS-friendly layouts and PDF and Word downloads. No sign-up; resumes stay on your device.",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Any (web browser)",
     "browserRequirements": "Requires JavaScript",
     "isAccessibleForFree": true,
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
-    "featureList": ["65 resume templates", "ATS-friendly single-column layouts", "PDF download with selectable text", "Editable Word (.docx) export", "JSON Resume import and export", "Runs in the browser; nothing you type is uploaded"],
+    "featureList": ["17 resume templates", "ATS-friendly single-column layouts", "PDF download with selectable text", "Editable Word (.docx) export", "JSON Resume import and export", "Runs in the browser; nothing you type is uploaded"],
     "image": "https://resume-builder.wasteddesigner.com/social-preview.png",
     "author": { "@type": "Person", "name": "Akila Sella Hennedige", "alternateName": "WastedDesigner", "url": "https://www.wasteddesigner.com/" }
   }
@@ -55,7 +55,7 @@
   <noscript>
     <div class="noscript">
       <h1>Resume Studio: free resume builder</h1>
-      <p>Build a professional resume in your browser with 65 templates, ATS-friendly layouts, and PDF and Word downloads. No sign-up, and nothing you type is uploaded.</p>
+      <p>Build a professional resume in your browser with 17 templates, ATS-friendly layouts, and PDF and Word downloads. No sign-up, and nothing you type is uploaded.</p>
       <p><b>Resume Studio needs JavaScript.</b> Turn it on in your browser settings, then reload this page.</p>
     </div>
   </noscript>
@@ -107,10 +107,12 @@
             <button class="icon-btn" data-act="zoomIn" aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button>
           </div>
           <span id="pageInfo" class="page-info"></span>
+          <button class="ats-pill" id="atsPill" data-act="atsToggle" aria-expanded="false" aria-controls="atsPanel" title="Live ATS check">ATS</button>
           <button class="btn small" data-act="openPages" title="Add, remove or fit pages"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="11" height="14" rx="1.5"/><path d="M9 21h9a2 2 0 0 0 2-2V8"/></svg>Pages</button>
           <div class="spacer"></div>
           <label class="mini-toggle"><input type="checkbox" id="guidesToggle"> Page breaks</label>
         </div>
+        <div class="ats-panel" id="atsPanel" hidden></div>
         <div class="stage-scroll" id="stageScroll">
           <div class="page-frame" id="pageFrame"><div class="page-scale" id="pageScale"></div></div>
         </div>
