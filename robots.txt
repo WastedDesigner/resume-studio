@@ -1,6 +1,6 @@
-# Served at the root of resume-builder.wasteddesigner.com. The GitHub Pages copy
+# Served at the root of resume-studio.wasteddesigner.com. The GitHub Pages copy
 # sits in a subfolder, so crawlers ignore it there; its canonical tag points here.
 User-agent: *
 Allow: /
 
-Sitemap: https://resume-builder.wasteddesigner.com/sitemap.xml
+Sitemap: https://resume-studio.wasteddesigner.com/sitemap.xml
