@@ -301,6 +301,13 @@ RS.TEMPLATES = [
   { id: 'signal', name: 'Signal', desc: 'Graphite banner with scarlet accents', set: { layout: 'banner-cols', theme: 'scarlet', fontHeading: 'Space Grotesk', fontBody: 'Inter', heading: 'bar', skillStyle: 'dots', upperHeadings: false, showPhoto: false } },
   { id: 'sunday', name: 'Sunday', desc: 'Butter-yellow sidebar and a classic serif', set: { layout: 'sidebar-left', theme: 'butter', fontHeading: 'Libre Baskerville', fontBody: 'Lato', heading: 'line', skillStyle: 'list', upperHeadings: false, photoShape: 'rounded' } },
   { id: 'fern', name: 'Fern', desc: 'Friendly rounded type on a green timeline', set: { layout: 'timeline', theme: 'fern', fontHeading: 'Nunito', fontBody: 'Nunito', heading: 'underline', skillStyle: 'tags', upperHeadings: false, showPhoto: false } },
+  // 2026 trends: restrained "clean tech" palettes, strong type, ATS-safe single columns, bento cards, dark sidebars.
+  { id: 'cleantech', name: 'Clean Tech', desc: '2026 look: lots of white space, navy accent, crisp sans', set: { layout: 'airy', theme: 'oxford', fontHeading: 'Inter', fontBody: 'Inter', heading: 'plain', skillStyle: 'tags', upperHeadings: true, showPhoto: false, sectionGap: 1.6 } },
+  { id: 'plainpro', name: 'Plain Pro', desc: 'ATS-safe single column, quiet slate rules', set: { layout: 'ats', theme: 'dustyblue', fontHeading: 'Source Sans 3', fontBody: 'Source Sans 3', fontSize: 10.5, upperHeadings: true } },
+  { id: 'jake', name: 'Engineer 1-Pager', desc: 'Dense single page in the popular developer style', set: { layout: 'ats', theme: 'ink', fontHeading: 'Crimson Pro', fontBody: 'Crimson Pro', fontSize: 10.5, sectionGap: 0.9, itemGap: 0.5, margin: 12, upperHeadings: true, bullet: 'disc' } },
+  { id: 'masthead', name: 'Masthead', desc: 'Oversized serif name with an editorial feel', set: { layout: 'editorial', theme: 'cloud', fontHeading: 'DM Serif Display', fontBody: 'Inter', skillStyle: 'inline', showPhoto: false, upperHeadings: true, nameSize: 3.4 } },
+  { id: 'bentogrid', name: 'Bento Grid', desc: 'Soft sage cards in a tidy two-column grid', set: { layout: 'cards', theme: 'sage', fontHeading: 'Plus Jakarta Sans', fontBody: 'Plus Jakarta Sans', heading: 'plain', skillStyle: 'tags', upperHeadings: false, showPhoto: false, nameSize: 2.7 } },
+  { id: 'nightshift', name: 'Nightshift', desc: 'Dark sidebar, electric blue accent, mono details', set: { layout: 'sidebar-right', theme: 'obsidian', fontHeading: 'Space Grotesk', fontBody: 'Inter', heading: 'caps', skillStyle: 'dots', photoShape: 'rounded' } },
 ];
 
 /* Apply a layout or template on top of a design object. */

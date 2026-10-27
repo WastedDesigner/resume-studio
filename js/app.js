@@ -86,7 +86,7 @@
     dateAlign: ['right', 'before', 'accent'],
   };
   const LIMITS = {
-    sideWidth: [22, 42], fontSize: [8, 13], lineHeight: [1.1, 1.8], nameSize: [1.5, 3.8],
+    sideWidth: [22, 42], fontSize: [6, 16], lineHeight: [1, 2], nameSize: [1.5, 3.8],
     headingSize: [0.8, 1.6], sectionGap: [0.4, 2.6], itemGap: [0.2, 1.8], margin: [6, 25], photoSize: [16, 48],
   };
   function sanitizeDesign(src) {
@@ -545,7 +545,7 @@
     html += '<div class="group-title">Typography</div>';
     html += `<div class="ctrl"><label for="pairing">Font pairing</label><select class="input" id="pairing" data-act-change="pairing"><option value="">Choose a pairing…</option>${RS.PAIRINGS.map(([h, bd], i) => `<option value="${i}" ${d.fontHeading === h && d.fontBody === bd ? 'selected' : ''}>${esc(h === bd ? h : h + ' + ' + bd)}</option>`).join('')}</select></div>`;
     html += fontSel('fontHeading', 'Heading font') + fontSel('fontBody', 'Body font');
-    html += rng('fontSize', 'Text size', 8, 13, 0.25, 'pt') + rng('lineHeight', 'Line spacing', 1.1, 1.8, 0.05, '') + rng('nameSize', 'Name size', 1.5, 3.8, 0.1, '×') + rng('headingSize', 'Heading size', 0.8, 1.6, 0.05, '×');
+    html += rng('fontSize', 'Text size', 6, 16, 0.5, 'pt') + rng('lineHeight', 'Line spacing', 1, 2, 0.05, '') + rng('nameSize', 'Name size', 1.5, 3.8, 0.1, '×') + rng('headingSize', 'Heading size', 0.8, 1.6, 0.05, '×');
     html += tog('upperHeadings', 'Uppercase headings') + tog('upperName', 'Uppercase name') + tog('boldName', 'Bold name');
 
     html += '<div class="group-title">Structure</div>';
